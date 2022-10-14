@@ -3,8 +3,8 @@ from Data.Scene.reward import Reward
 from Data.Character.player import Player
 
 
-class Action:
-    def __init__(self, description: str = "[ null ]", disable_on_select=False, id: int = -777, remove_on_select=False,
+class Action:  # TODO make certain attributes protected?
+    def __init__(self, description: str = "New Action", disable_on_select=False, id: int = -777, remove_on_select=False,
                  requirement: Requirement = None, reward: Reward = None):
         self.description = description
         self.enabled = True

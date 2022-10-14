@@ -2,11 +2,14 @@ from functools import partial
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from Data.Character.character import Character
 from Data.UI.ui import UI
 
 
 class UiNewGame(UI):
+    _introductionText = "You begin to feel a swaying motion transition into abrupt shakes as a blinding light " \
+                        "swallows you. As you rub your eyes, you find yourself in the woods. Before long you notice " \
+                        "the muffled voice of the burly man before you, \"Are you okay? Do you remember who you are?\""
+
     def __init__(self, window: QtWidgets.QMainWindow):
         super().__init__(window, window_name="NewGameWindow", window_show_size=QtCore.QSize(800, 600),
                          window_title="Text RPG - New Game")
@@ -158,12 +161,7 @@ class UiNewGame(UI):
             ap = self.player.ability_points
         self._abilityPointsLabel.setText(self._translate(self._window_name, "Ability Points (AP):"))
         self._abilityPointsRemainingLabel.setText(self._translate(self._window_name, str(ap)))
-        self._introductionLabel.setText(
-            self._translate(self._window_name, "[Dream]. You begin to feel the swaying motion "
-                                               "transition "
-                                               "into "
-                                               "abrupt "
-                                               "shakes as a blinding light swallows you. As you rub your eyes, you find yourself in the woods. Before long you notice the muffled voice of the burly man before you, \"Are you okay? Do you remember who you are?\""))
+        self._introductionLabel.setText(self._translate(self._window_name, self._introductionText))
         self._startGameButton.setText(self._translate(self._window_name, "Begin Journey"))
         self._cancelButton.setText(self._translate(self._window_name, "Cancel"))
 

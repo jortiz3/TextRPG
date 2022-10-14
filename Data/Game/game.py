@@ -24,8 +24,9 @@ class Game:
 
         self._app = QApplication(sys.argv)
         self._ui = UiManager()
-        self._ui.gameMenu().connect(get_area=self._sceneManager.current, get_area_description=self._sceneManager.areaDescription,
-                                    player=self._player, save_game=self.saveGame, select_action=self.selectAction)
+        self._ui.gameMenu().connect(get_scene=self._sceneManager.current,
+                                    get_scene_description=self._sceneManager.sceneDescription, player=self._player,
+                                    save_game=self.saveGame, select_action=self.selectAction)
         self._ui.loadMenu().connect(delete_save=self.deleteSave, load_save=self.loadGame, load_info=self.loadInfo)
         self._ui.mainMenu().connect(goto_new=self.newGame)
         self._ui.newGameMenu().connect(player=self._player, start_game=self.startGame)
@@ -65,6 +66,7 @@ class Game:
 
     def newGame(self):
         self._player.resetAttributes()
+        self._sceneManager.reset()
         self._ui.show("new")
 
     def _saveFilepath(self, file_index: int):
@@ -82,8 +84,8 @@ class Game:
         save_data = jsons.dumps(self._player, jdkwargs=Game.__json_args, strip_privates=True, strip_properties=True,
                                 verbose=jsons.Verbosity.WITH_CLASS_INFO)
         save_data += Game.__save_delimiter
-        save_data += jsons.dumps(self._sceneManager, jdkwargs=Game.__json_args, strip_privates=True, strip_properties=True,
-                                 verbose=jsons.Verbosity.WITH_CLASS_INFO)
+        save_data += jsons.dumps(self._sceneManager, jdkwargs=Game.__json_args, strip_privates=True,
+                                 strip_properties=True, verbose=jsons.Verbosity.WITH_CLASS_INFO)
         with open(save_filepath, 'w') as save_file:
             save_file.write(save_data)
 
