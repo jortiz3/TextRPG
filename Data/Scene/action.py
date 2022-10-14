@@ -3,24 +3,24 @@ from Data.Scene.reward import Reward
 from Data.Character.player import Player
 
 
-class Action:  # TODO make certain attributes protected?
+class Action:
     def __init__(self, description: str = "New Action", disable_on_select=False, id: int = -777, remove_on_select=False,
                  requirement: Requirement = None, reward: Reward = None):
-        self.description = description
+        self._description = description
         self.enabled = True
-        self.disableOnSelect = disable_on_select
-        self.id = id
+        self._disableOnSelect = disable_on_select
+        self._id = id
         self.removed = False
-        self.removeOnSelect = remove_on_select
-        self.requirement: Requirement = requirement
-        self.reward: Reward = reward
+        self._removeOnSelect = remove_on_select
+        self._requirement: Requirement = requirement
+        self._reward: Reward = reward
         self.selected = False
 
     def __eq__(self, other):
         if type(self) is not type(other):
             return False
         otherAction: Action = other
-        return self.id == otherAction.id and self.description == otherAction.description
+        return self._id == otherAction._id and self._description == otherAction._description
 
     def requirementMet(self, player: Player):
         """
@@ -30,9 +30,9 @@ class Action:  # TODO make certain attributes protected?
         """
         if not self.enabled:
             return False
-        elif not self.requirement:
+        elif not self._requirement:
             return True
-        return self.requirement.met(player)
+        return self._requirement.met(player)
 
     def select(self, player: Player):
         """
@@ -43,11 +43,32 @@ class Action:  # TODO make certain attributes protected?
         if not self.enabled:
             return False
         if not self.selected:
-            if self.requirement:
-                self.requirement.consume(player)
-            if self.reward:
-                self.reward.distribute(player)
-        self.enabled = not self.disableOnSelect
-        self.removed = self.removeOnSelect
+            if self._requirement:
+                self._requirement.consume(player)
+            if self._reward:
+                self._reward.distribute(player)
+        self.enabled = not self._disableOnSelect
+        self.removed = self._removeOnSelect
         self.selected = True
-        return self.id >= -1
+        return self._id >= -1
+
+    def description(self):
+        return self._description
+
+    def setDescription(self, value: str):
+        self._description = value
+
+    def disableOnSelect(self):
+        return self._disableOnSelect
+
+    def id(self):
+        return self._id
+
+    def removeOnSelect(self):
+        return self._removeOnSelect
+
+    def requirement(self):
+        return self._requirement
+
+    def reward(self):
+        return self._reward

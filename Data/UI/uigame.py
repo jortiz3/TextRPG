@@ -239,7 +239,7 @@ class UiGame(UI):
                             icon = self._xIcon
                         action_button.setIcon(icon)
                         action_button.setEnabled(action.enabled)
-                        action_button.setText(self._translate(self._window_name, action.description))
+                        action_button.setText(self._translate(self._window_name, action.description()))
                         action_button.show()
                         continue
             action_button.hide()

@@ -77,5 +77,5 @@ class SceneManager:
         if self.current():
             action = self.current().getAction(index)
             if action.requirementMet(self.__player) and action.select(self.__player):
-                return self.goto(action.id)
+                return self.goto(action.id())
         return None

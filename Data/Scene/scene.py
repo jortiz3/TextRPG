@@ -22,6 +22,6 @@ class Scene:
             self.actions.pop(index)
 
     def setReturnAction(self, description: str):
-        if len(self.actions) > 0 and self.actions[-1].id == -1:
-            self.actions[-1].description = description
+        if len(self.actions) > 0 and self.actions[-1].id() == -1:
+            self.actions[-1].setDescription(description)
             return
