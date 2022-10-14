@@ -40,13 +40,14 @@ class Action:
         :param player: The active player.
         :return: True if scene change is required.
         """
-        if not self.enabled or self.selected:
+        if not self.enabled:
             return False
-        if self.requirement:
-            self.requirement.consume(player)
-        if self.reward:
-            self.reward.distribute(player)
+        if not self.selected:
+            if self.requirement:
+                self.requirement.consume(player)
+            if self.reward:
+                self.reward.distribute(player)
         self.enabled = not self.disableOnSelect
         self.removed = self.removeOnSelect
         self.selected = True
-        return self.id >= 0
+        return self.id >= -1

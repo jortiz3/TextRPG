@@ -7,7 +7,7 @@ from Data.UI.ui import UI
 
 
 class UiMain(UI):
-    __splash_dir = "Data/Images/Main/"
+    __splash_dir = "Data/Images/Scene/"
 
     def __init__(self, window: QtWidgets.QMainWindow):
         super().__init__(window, window_name="MainWindow", window_show_size=QtCore.QSize(800, 600),
@@ -49,7 +49,7 @@ class UiMain(UI):
 
     def randomSplash(self):
         files = os.listdir(self.__splash_dir)
-        fileName = "red dragon hydra.png"
+        fileName = ""
         if files:
             fileName = files[random.randint(0, len(files) - 1)]
         path = "{}/{}".format(self.__splash_dir, fileName)
