@@ -7,10 +7,11 @@ from Data.Character.player import Player
 class SceneManager:
     __default_path = "Data/scenes.json"
 
-    def __init__(self, player: Player):
+    def __init__(self, player: Player = Player()):
         with open(self.__default_path, 'r') as scenes_file:
             self.__scenes: list[Scene] = jsons.loads(scenes_file.read())
         self.__player = player
+        # TODO func save/load of scenes
         self.currentSceneIndex = 0
         self.previousSceneIndexes: list[int] = []
 
@@ -77,5 +78,16 @@ class SceneManager:
         if self.current():
             action = self.current().getAction(index)
             if action.requirementMet(self.__player) and action.select(self.__player):
-                return self.goto(action.id())
+                return self.goto(action.id)
         return None
+
+    @property
+    def scenes(self):
+        return self.__scenes
+
+    @scenes.setter
+    def scenes(self, value: list[Scene]):
+        for instance in value:
+            for scene in self.__scenes:
+                if scene == instance:
+                    scene.copyActions(instance)

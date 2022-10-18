@@ -6,9 +6,7 @@ from Data.UI.ui import UI
 
 
 class UiNewGame(UI):
-    _introductionText = "You begin to feel a swaying motion transition into abrupt shakes as a blinding light " \
-                        "swallows you. As you rub your eyes, you find yourself in the woods. Before long you notice " \
-                        "the muffled voice of the burly man before you, \"Are you okay? Do you remember who you are?\""
+    _introductionText = "Dark... Why is it so dark... Where am I... Who am I..."
 
     def __init__(self, window: QtWidgets.QMainWindow):
         super().__init__(window, window_name="NewGameWindow", window_show_size=QtCore.QSize(800, 600),

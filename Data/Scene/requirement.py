@@ -24,7 +24,7 @@ class Requirement:
         :return: True if all requirements are met.
         """
         for ability in self.abilities:
-            if character.ability(ability.name) < ability.score:
+            if character.ability(ability.name, "score") < ability.score:
                 return False
 
         if self.items:

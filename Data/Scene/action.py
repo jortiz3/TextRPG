@@ -12,15 +12,15 @@ class Action:
         self._id = id
         self.removed = False
         self._removeOnSelect = remove_on_select
-        self._requirement: Requirement = requirement
-        self._reward: Reward = reward
+        self.requirement: Requirement = requirement
+        self.reward: Reward = reward
         self.selected = False
 
     def __eq__(self, other):
         if type(self) is not type(other):
             return False
         otherAction: Action = other
-        return self._id == otherAction._id and self._description == otherAction._description
+        return self.id == otherAction.id and self._description == otherAction._description
 
     def requirementMet(self, player: Player):
         """
@@ -30,9 +30,9 @@ class Action:
         """
         if not self.enabled:
             return False
-        elif not self._requirement:
+        elif not self.requirement:
             return True
-        return self._requirement.met(player)
+        return self.requirement.met(player)
 
     def select(self, player: Player):
         """
@@ -43,32 +43,43 @@ class Action:
         if not self.enabled:
             return False
         if not self.selected:
-            if self._requirement:
-                self._requirement.consume(player)
-            if self._reward:
-                self._reward.distribute(player)
-        self.enabled = not self._disableOnSelect
-        self.removed = self._removeOnSelect
+            if self.requirement:
+                self.requirement.consume(player)
+            if self.reward:
+                self.reward.distribute(player)
+        self.enabled = not self.disableOnSelect
+        self.removed = self.removeOnSelect
         self.selected = True
-        return self._id >= -1
+        return self.id >= -1
 
+    @property
     def description(self):
         return self._description
 
-    def setDescription(self, value: str):
+    @description.setter
+    def description(self, value: str):
         self._description = value
 
+    @property
     def disableOnSelect(self):
         return self._disableOnSelect
 
+    @disableOnSelect.setter
+    def disableOnSelect(self, value: bool):
+        self._disableOnSelect = value
+
+    @property
     def id(self):
         return self._id
 
+    @id.setter
+    def id(self, value: int):
+        self._id = value
+
+    @property
     def removeOnSelect(self):
         return self._removeOnSelect
 
-    def requirement(self):
-        return self._requirement
-
-    def reward(self):
-        return self._reward
+    @removeOnSelect.setter
+    def removeOnSelect(self, value: bool):
+        self._removeOnSelect = value

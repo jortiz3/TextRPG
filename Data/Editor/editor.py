@@ -444,13 +444,13 @@ class Editor(QtCore.QObject):
             data = self.scenes[self.sceneIndex].actions
         elif context == "requirement ability":
             deleteIndex = self.requirementAbilityIndex
-            data = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().abilities
+            data = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
         elif context == "requirement item":
             deleteIndex = self.requirementItemIndex
-            data = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().items
+            data = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items
         elif context == "reward item":
             deleteIndex = self.rewardItemIndex
-            data = self.scenes[self.sceneIndex].actions[self.actionIndex].reward().items
+            data = self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items
         elif context == "item":
             deleteIndex = self.itemIndex
             data = self.items
@@ -493,7 +493,7 @@ class Editor(QtCore.QObject):
         description = "New {}".format(context.capitalize())
         if context == "scene":
             self.sceneIndex = len(self.scenes)
-            newScene = Scene("New Scene", "New Enter Description", "You carry on...", "", [])
+            newScene = Scene("New Scene", "New Enter Description", "You carry on...", "", [], self.sceneIndex)
             self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
@@ -501,17 +501,17 @@ class Editor(QtCore.QObject):
             newAction = Action(requirement=Requirement([], []), reward=Reward(0, []))
             self.undoStack.push(UndoNew(actions, self.actionIndex, newAction, description))
         elif context == "requirement ability":
-            abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().abilities
+            abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
             self.requirementAbilityIndex = len(abilities)
             newAbility = Ability("dexterity")
             self.undoStack.push(UndoNew(abilities, self.requirementAbilityIndex, newAbility, description))
         elif context == "requirement item":
-            requirementItems = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().items
+            requirementItems = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items
             self.requirementItemIndex = len(requirementItems)
             newReqItem = ItemRef(0, 0)
             self.undoStack.push(UndoNew(requirementItems, self.requirementItemIndex, newReqItem, description))
         elif context == "reward item":
-            rewardItems = self.scenes[self.sceneIndex].actions[self.actionIndex].reward().items
+            rewardItems = self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items
             self.rewardItemIndex = len(rewardItems)
             newRewardItem = ItemRef(0, 0)
             self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
@@ -535,13 +535,13 @@ class Editor(QtCore.QObject):
             self.requirementItemIndex = 0
             self.rewardItemIndex = 0
         elif context == "requirement ability" and self.requirementAbilityIndex < len(
-                self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().abilities) - 1:
+                self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities) - 1:
             self.requirementAbilityIndex += 1
         elif context == "requirement item" and self.requirementItemIndex < len(
-                self.scenes[self.sceneIndex].actions[self.actionIndex].requirement().items) - 1:
+                self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items) - 1:
             self.requirementItemIndex += 1
         elif context == "reward item" and self.rewardItemIndex < len(
-                self.scenes[self.sceneIndex].actions[self.actionIndex].reward().items) - 1:
+                self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items) - 1:
             self.rewardItemIndex += 1
         elif context == "item" and self.itemIndex < len(self.items):
             self.itemIndex += 1
@@ -608,12 +608,12 @@ class Editor(QtCore.QObject):
             actionAvailable = bool(sceneAvailable and self.actionIndex < len(scene.actions))
             if actionAvailable:
                 action = scene.actions[self.actionIndex]
-                self.actionDescriptionInput.setText(action.description())
-                self.actionIdInput.setText(str(action.id()))
-                self.disableOnSelectCheck.setChecked(action.disableOnSelect())
-                self.removeOnSelectCheck.setChecked(action.removeOnSelect())
+                self.actionDescriptionInput.setText(action.description)
+                self.actionIdInput.setText(str(action.id))
+                self.disableOnSelectCheck.setChecked(action.disableOnSelect)
+                self.removeOnSelectCheck.setChecked(action.removeOnSelect)
 
-            requirement = action.requirement() if actionAvailable else None
+            requirement = action.requirement if actionAvailable else None
             requirementAbilityAvailable = bool(
                 requirement and requirement.abilities and self.requirementAbilityIndex < len(requirement.abilities))
             if requirementAbilityAvailable:
@@ -628,7 +628,7 @@ class Editor(QtCore.QObject):
                 self.requirementItemIdInput.setText(str(requiredItem.id))
                 self.requirementItemQtyInput.setText(str(requiredItem.quantity))
 
-            reward = action.reward() if actionAvailable else None
+            reward = action.reward if actionAvailable else None
             rewardExperienceAvailable = bool(reward and reward.experience is not None)
             if rewardExperienceAvailable:
                 self.rewardExpInput.setText(str(reward.experience))
@@ -690,7 +690,7 @@ class Editor(QtCore.QObject):
     def save(path: str, data):
         args = {"indent": 4, "sort_keys": True}
         with open(path, 'w') as file:
-            file.write(jsons.dumps(data, jdkwargs=args, verbose=True))
+            file.write(jsons.dumps(data, jdkwargs=args, strip_properties=True, verbose=jsons.Verbosity.WITH_CLASS_INFO))
 
     def saveAll(self):
         self.save(self.__path_items, self.items)
@@ -703,13 +703,13 @@ class Editor(QtCore.QObject):
         scene = self.scenes[self.sceneIndex]
         target = scene
         if context.__contains__("requirement"):
-            requirement = scene.actions[self.actionIndex].requirement()
+            requirement = scene.actions[self.actionIndex].requirement
             if context.__contains__("ability"):
                 target = requirement.abilities[self.requirementAbilityIndex]
             else:
                 target = requirement.items[self.requirementItemIndex]
         elif context.__contains__("reward"):
-            reward = scene.actions[self.actionIndex].reward()
+            reward = scene.actions[self.actionIndex].reward
             if context.__contains__("item"):
                 target = reward.items[self.rewardItemIndex]
             else:

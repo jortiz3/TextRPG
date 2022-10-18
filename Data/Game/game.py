@@ -49,8 +49,8 @@ class Game:
 
         with open(save_filepath, 'r') as save_file:
             save_data = save_file.read().split(Game.__save_delimiter)
-            self._player.copyAttributes(jsons.loads(save_data[0], strip_privates=True, strip_properties=True))
-            self._sceneManager.copyAttributes(jsons.loads(save_data[1], strip_privates=True, strip_properties=True))
+            self._player.copyAttributes(jsons.loads(save_data[0]))
+            self._sceneManager.copyAttributes(jsons.loads(save_data[1]))
         self._ui.show("game")
 
     def loadInfo(self):
@@ -85,7 +85,7 @@ class Game:
                                 verbose=jsons.Verbosity.WITH_CLASS_INFO)
         save_data += Game.__save_delimiter
         save_data += jsons.dumps(self._sceneManager, jdkwargs=Game.__json_args, strip_privates=True,
-                                 strip_properties=True, verbose=jsons.Verbosity.WITH_CLASS_INFO)
+                                 verbose=jsons.Verbosity.WITH_CLASS_INFO)
         with open(save_filepath, 'w') as save_file:
             save_file.write(save_data)
 
