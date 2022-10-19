@@ -13,6 +13,8 @@ from Data.Editor.item_view import ItemView
 from Data.Editor.undo_delete import UndoDelete
 from Data.Editor.undo_new import UndoNew
 from Data.Item.item_reference import ItemRef
+from Data.Scene.requirement import Requirement
+from Data.Scene.reward import Reward
 from Data.Scene.scene import Scene
 from Data.Scene.action import Action
 from Data.Item.item import Item
@@ -28,7 +30,6 @@ class Editor(QtCore.QObject):
         self.scenes: list[Scene] = self.load(self.__path_scenes)
         self.actionIndex = 0
         self.sceneIndex = 0
-        self.itemIndex = 0
         self.requirementAbilityIndex = 0
         self.requirementItemIndex = 0
         self.rewardItemIndex = 0
@@ -405,18 +406,18 @@ class Editor(QtCore.QObject):
             partial(self.set, "action.disableOnSelect", self.disableOnSelectCheck))
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
         self.requirementAbilityInput.editingFinished.connect(
-            partial(self.set, "action._requirement.ability.name", self.requirementAbilityInput))
+            partial(self.set, "action.requirement.ability.name", self.requirementAbilityInput))
         self.requirementScoreInput.editingFinished.connect(
-            partial(self.set, "action._requirement.ability.score", self.requirementScoreInput))
+            partial(self.set, "action.requirement.ability.score", self.requirementScoreInput))
         self.requirementItemIdInput.editingFinished.connect(
-            partial(self.set, "action._requirement.item.id", self.requirementItemIdInput))
+            partial(self.set, "action.requirement.item.id", self.requirementItemIdInput))
         self.requirementItemQtyInput.editingFinished.connect(
-            partial(self.set, "action._requirement.item.quantity", self.requirementItemQtyInput))
+            partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput))
         self.rewardExpInput.editingFinished.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
         self.rewardItemIdInput.editingFinished.connect(
-            partial(self.set, "action._reward.item.id", self.rewardItemIdInput))
+            partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
         self.rewardItemQtyInput.editingFinished.connect(
-            partial(self.set, "action._reward.item.quantity", self.rewardItemQtyInput))
+            partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
         self.sceneIndexInput.editingFinished.connect(partial(self.setIndex, "scene", self.sceneIndexInput))
         self.actionIndexInput.editingFinished.connect(partial(self.setIndex, "action", self.actionIndexInput))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
@@ -504,12 +505,19 @@ class Editor(QtCore.QObject):
         description = "New {}".format(context.capitalize())
         if context == "scene":
             self.sceneIndex = len(self.scenes)
+            self.actionIndex = 0
+            self.requirementAbilityIndex = 0
+            self.requirementItemIndex = 0
+            self.rewardItemIndex = 0
             newScene = Scene()
             self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
             self.actionIndex = len(actions)
-            newAction = Action()
+            self.requirementAbilityIndex = 0
+            self.requirementItemIndex = 0
+            self.rewardItemIndex = 0
+            newAction = Action(requirement=Requirement([], []), reward=Reward(10, []))
             self.undoStack.push(UndoNew(actions, self.actionIndex, newAction, description))
         elif context == "requirement ability":
             abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
@@ -549,8 +557,6 @@ class Editor(QtCore.QObject):
         elif context == "reward item" and self.rewardItemIndex < len(
                 self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items) - 1:
             self.rewardItemIndex += 1
-        elif context == "item" and self.itemIndex < len(self.items):
-            self.itemIndex += 1
         self.refresh()
 
     def pickImageFile(self):
@@ -567,16 +573,21 @@ class Editor(QtCore.QObject):
     def previous(self, context: str):
         if context == "scene" and self.sceneIndex > 0:
             self.sceneIndex -= 1
+            self.actionIndex = 0
+            self.requirementAbilityIndex = 0
+            self.requirementItemIndex = 0
+            self.rewardItemIndex = 0
         elif context == "action" and self.actionIndex > 0:
             self.actionIndex -= 1
+            self.requirementAbilityIndex = 0
+            self.requirementItemIndex = 0
+            self.rewardItemIndex = 0
         elif context == "requirement ability" and self.requirementAbilityIndex > 0:
             self.requirementAbilityIndex -= 1
         elif context == "requirement item" and self.requirementItemIndex > 0:
             self.requirementItemIndex -= 1
         elif context == "reward item" and self.rewardItemIndex > 0:
             self.rewardItemIndex -= 1
-        elif context == "item" and self.itemIndex > 0:
-            self.itemIndex -= 1
         self.refresh()
 
     def redo(self):
@@ -606,7 +617,7 @@ class Editor(QtCore.QObject):
             sceneAvailable = bool(self.scenes and self.sceneIndex < len(self.scenes))
             sceneIndexText = "-"
             sceneNameText = "-"
-            imagePathText = ""
+            imagePathText = "-"
             enterText = "-"
             exitText = "-"
             if sceneAvailable:
@@ -673,8 +684,10 @@ class Editor(QtCore.QObject):
 
             reward = action.reward if actionAvailable else None
             rewardExperienceAvailable = bool(reward and reward.experience is not None)
+            rewardExpText = "-"
             if rewardExperienceAvailable:
-                self.rewardExpInput.setText(str(reward.experience))
+                rewardExpText = str(reward.experience)
+            self.rewardExpInput.setText(rewardExpText)
 
             rewardItemAvailable = bool(reward and reward.items and self.rewardItemIndex < len(reward.items))
             rewardItemIndexText = "-"

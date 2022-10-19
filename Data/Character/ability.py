@@ -4,11 +4,10 @@ class Ability:
         self._description: str = description
         self.score: float = score
 
-    def __getstate__(self):
-        return {"score": self.score}
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
+    def getState(self):
+        return {
+            "score": self.score
+        }
 
     @property
     def description(self):
@@ -17,3 +16,7 @@ class Ability:
     @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
