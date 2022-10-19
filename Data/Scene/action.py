@@ -5,16 +5,16 @@ from Data.Character.player import Player
 
 class Action:
     def __init__(self, description: str = "New Action", disable_on_select=False, id: int = -777, remove_on_select=False,
-                 requirement: Requirement = None, reward: Reward = None):
-        self._description = description
-        self.enabled = True
-        self._disableOnSelect = disable_on_select
-        self._id = id
-        self.removed = False
-        self._removeOnSelect = remove_on_select
-        self.requirement: Requirement = requirement
-        self.reward: Reward = reward
-        self.selected = False
+                 requirement: Requirement = Requirement(), reward: Reward = Reward()):
+        self._description: str = description
+        self.enabled: bool = True
+        self._disableOnSelect: bool = disable_on_select
+        self._id: int = id
+        self.removed: bool = False
+        self._removeOnSelect: bool = remove_on_select
+        self._requirement: Requirement = requirement
+        self._reward: Reward = reward
+        self.selected: bool = False
 
     def __eq__(self, other):
         if type(self) is not type(other):
@@ -30,9 +30,9 @@ class Action:
         """
         if not self.enabled:
             return False
-        elif not self.requirement:
+        elif not self._requirement:
             return True
-        return self.requirement.met(player)
+        return self._requirement.met(player)
 
     def select(self, player: Player):
         """
@@ -43,10 +43,10 @@ class Action:
         if not self.enabled:
             return False
         if not self.selected:
-            if self.requirement:
-                self.requirement.consume(player)
-            if self.reward:
-                self.reward.distribute(player)
+            if self._requirement:
+                self._requirement.consume(player)
+            if self._reward:
+                self._reward.distribute(player)
         self.enabled = not self.disableOnSelect
         self.removed = self.removeOnSelect
         self.selected = True
@@ -70,7 +70,7 @@ class Action:
 
     @property
     def id(self):
-        return self._id
+        return int(self._id)
 
     @id.setter
     def id(self, value: int):
@@ -83,3 +83,11 @@ class Action:
     @removeOnSelect.setter
     def removeOnSelect(self, value: bool):
         self._removeOnSelect = value
+
+    @property
+    def requirement(self):
+        return self._requirement
+
+    @property
+    def reward(self):
+        return self._reward

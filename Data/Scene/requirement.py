@@ -4,9 +4,9 @@ from Data.Item.item_reference import ItemRef
 
 
 class Requirement:
-    def __init__(self, abilities: list[Ability] = None, items: list[ItemRef] = None):
-        self.abilities = abilities
-        self.items = items
+    def __init__(self, abilities: list[Ability] = [], items: list[ItemRef] = []):
+        self.abilities: list[Ability] = abilities
+        self.items: list[ItemRef] = items
 
     def consume(self, character: Character):
         """

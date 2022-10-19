@@ -1,0 +1,31 @@
+[
+    {
+        "py/object": "Data.Scene.scene.Scene",
+        "actions": [
+            {
+                "py/object": "Data.Scene.action.Action",
+                "_description": "New Action",
+                "enabled": true,
+                "_disableOnSelect": true,
+                "_id": -777,
+                "removed": false,
+                "_removeOnSelect": false,
+                "_requirement": {
+                    "py/object": "Data.Scene.requirement.Requirement",
+                    "abilities": [],
+                    "items": []
+                },
+                "_reward": {
+                    "py/object": "Data.Scene.reward.Reward",
+                    "experience": 10,
+                    "items": []
+                },
+                "selected": false
+            }
+        ],
+        "_enterDescription": "...",
+        "_exitDescription": "You carry on...",
+        "_imagePath": "",
+        "_name": "New Scene"
+    }
+]

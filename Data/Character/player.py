@@ -1,7 +1,6 @@
 from Data.Character.ability import Ability
 from Data.Character.character import Character
 from Data.Item.inventory import Inventory
-from Data.Item.item_reference import ItemRef
 
 
 class Player(Character):
@@ -36,11 +35,14 @@ class Player(Character):
             self.resetAttributes()
             return
         self.name = other.name
-        self.abilities = other.abilities
         self.level = other.level
         self.experience = other.experience
         self.ability_points = other.ability_points
         self.inventory = other.inventory
+        if len(self.abilities) != len(other.abilities):
+            return
+        for index, ability in enumerate(self.abilities):
+            ability.score = other.abilities[index].score
 
     def requiredExperience(self):
         """

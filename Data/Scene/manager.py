@@ -1,4 +1,4 @@
-import jsons
+import jsonpickle
 
 from Data.Scene.scene import Scene
 from Data.Character.player import Player
@@ -9,20 +9,10 @@ class SceneManager:
 
     def __init__(self, player: Player = Player()):
         with open(self.__default_path, 'r') as scenes_file:
-            self.__scenes: list[Scene] = jsons.loads(scenes_file.read())
+            self.scenes: list[Scene] = jsonpickle.decode(scenes_file.read())
         self.__player = player
-        # TODO func save/load of scenes
         self.currentSceneIndex = 0
         self.previousSceneIndexes: list[int] = []
-
-    def sceneDescription(self):
-        """
-        Retrieves the description text for the current scene.
-        :return:  The scene description.
-        """
-        description = "{}\n\n".format(self.previous().exitDescription) if self.previous() else ""
-        description += self.current().enterDescription if self.current() else ""
-        return description
 
     def copyAttributes(self, other):
         if not isinstance(other, SceneManager):
@@ -31,12 +21,21 @@ class SceneManager:
             return
         self.currentSceneIndex = other.currentSceneIndex
         self.previousSceneIndexes = other.previousSceneIndexes
+        if len(self.scenes) != len(other.scenes):
+            return
+        for index, scene in enumerate(self.scenes):
+            scene.copyActions(other.scenes[index])
 
     def current(self):
         """Retrieves the current scene object."""
-        if self.currentSceneIndex not in range(len(self.__scenes)):
+        if self.currentSceneIndex not in range(len(self.scenes)):
             return None
-        return self.__scenes[self.currentSceneIndex]
+        return self.scenes[self.currentSceneIndex]
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['_SceneManager__player']
+        return state
 
     def goto(self, index: int):
         """
@@ -49,7 +48,7 @@ class SceneManager:
             temp_index = self.previousSceneIndexes[-1]
             self.previousSceneIndexes.pop()
             self.currentSceneIndex = temp_index
-        elif index < len(self.__scenes):
+        elif index < len(self.scenes):
             self.previousSceneIndexes.append(self.currentSceneIndex)
             self.currentSceneIndex = index
 
@@ -62,13 +61,25 @@ class SceneManager:
         if len(self.previousSceneIndexes) <= 0:
             return None
         if self.previousSceneIndexes[-1] not in range(
-                len(self.__scenes)) or self.previousSceneIndexes[-1] == self.currentSceneIndex:
+                len(self.scenes)) or self.previousSceneIndexes[-1] == self.currentSceneIndex:
             return None
-        return self.__scenes[self.previousSceneIndexes[-1]]
+        return self.scenes[self.previousSceneIndexes[-1]]
 
     def reset(self):
         self.currentSceneIndex = 0
         self.previousSceneIndexes = []
+
+    def sceneDescription(self):
+        """
+        Retrieves the description text for the current scene.
+        :return:  The scene description.
+        """
+        description = "{}\n\n".format(self.previous().exitDescription) if self.previous() else ""
+        description += self.current().enterDescription if self.current() else ""
+        return description
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def selectAction(self, index: int):
         """
@@ -80,14 +91,3 @@ class SceneManager:
             if action.requirementMet(self.__player) and action.select(self.__player):
                 return self.goto(action.id)
         return None
-
-    @property
-    def scenes(self):
-        return self.__scenes
-
-    @scenes.setter
-    def scenes(self, value: list[Scene]):
-        for instance in value:
-            for scene in self.__scenes:
-                if scene == instance:
-                    scene.copyActions(instance)

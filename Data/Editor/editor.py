@@ -2,9 +2,9 @@ import copy
 import sys
 from functools import partial
 from os.path import exists
-from typing import Union, Type
 
-import jsons
+import jsonpickle
+
 from PyQt5 import Qt, QtCore, QtGui, QtWidgets
 
 from Data.Character.ability import Ability
@@ -15,8 +15,6 @@ from Data.Editor.undo_new import UndoNew
 from Data.Item.item_reference import ItemRef
 from Data.Scene.scene import Scene
 from Data.Scene.action import Action
-from Data.Scene.requirement import Requirement
-from Data.Scene.reward import Reward
 from Data.Item.item import Item
 
 
@@ -26,8 +24,8 @@ class Editor(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self.items: list[Item] = self.load(self.__path_items, list[Item])
-        self.scenes: list[Scene] = self.load(self.__path_scenes, list[Scene])
+        self.items: list[Item] = self.load(self.__path_items)
+        self.scenes: list[Scene] = self.load(self.__path_scenes)
         self.actionIndex = 0
         self.sceneIndex = 0
         self.itemIndex = 0
@@ -482,23 +480,22 @@ class Editor(QtCore.QObject):
         self.refresh()
 
     @staticmethod
-    def load(path: str, data_type: Type[list[Union[Item, Scene]]]):
-        data: data_type = []
-        if exists(path):
-            with open(path, 'r') as file:
-                data: data_type = jsons.loads(file.read())
-        return data
+    def load(path: str):
+        if not exists(path):
+            return []
+        with open(path, 'r') as file:
+            return jsonpickle.decode(file.read())
 
     def new(self, context: str):
         description = "New {}".format(context.capitalize())
         if context == "scene":
             self.sceneIndex = len(self.scenes)
-            newScene = Scene("New Scene", "New Enter Description", "You carry on...", "", [], self.sceneIndex)
+            newScene = Scene()
             self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
             self.actionIndex = len(actions)
-            newAction = Action(requirement=Requirement([], []), reward=Reward(0, []))
+            newAction = Action()
             self.undoStack.push(UndoNew(actions, self.actionIndex, newAction, description))
         elif context == "requirement ability":
             abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
@@ -688,9 +685,9 @@ class Editor(QtCore.QObject):
 
     @staticmethod
     def save(path: str, data):
-        args = {"indent": 4, "sort_keys": True}
+        # args = {"indent": 4, "sort_keys": True}
         with open(path, 'w') as file:
-            file.write(jsons.dumps(data, jdkwargs=args, strip_properties=True, verbose=jsons.Verbosity.WITH_CLASS_INFO))
+            file.write(jsonpickle.encode(data, indent=4))
 
     def saveAll(self):
         self.save(self.__path_items, self.items)

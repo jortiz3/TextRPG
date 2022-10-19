@@ -19,7 +19,7 @@ class Inventory:
     def clear(self):
         """Removes all items."""
         self.itemRefs.clear()
-        self.__modified()
+        Inventory.__modified()
 
     def __contains__(self, item_reference: ItemRef):
         """Return key in self."""
@@ -32,7 +32,7 @@ class Inventory:
         """
         emptied_items = self.itemRefs
         self.itemRefs = []
-        self.__modified()
+        Inventory.__modified()
         return emptied_items
 
     def full(self) -> bool:
@@ -58,6 +58,12 @@ class Inventory:
                     return item
         return None
 
+    def __getstate__(self):
+        return {
+            "currency": self.currency,
+            "itemRefs": self.itemRefs
+        }
+
     def __len__(self):
         return len(self.itemRefs)
 
@@ -80,7 +86,7 @@ class Inventory:
                     continue
                 bisect.insort(self.itemRefs, item_reference)
                 continue
-        self.__modified()
+        Inventory.__modified()
         return rejected_items
 
     def remove(self, index: int = None, item_reference: ItemRef = None, quantity: int = 0):
@@ -99,10 +105,14 @@ class Inventory:
         item_reference.quantity -= abs(quantity)
         if quantity == 0 or item_reference.quantity <= 0:
             self.itemRefs.remove(item_reference)
-        self.__modified()
+        Inventory.__modified()
 
-    def setOnModified(self, slot):
-        self.__modified = slot
+    @staticmethod
+    def setOnModified(slot):
+        Inventory.__modified = slot
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def use(self, index: int = None, item_reference: ItemRef = None, quantity: int = 1):
         if index:
@@ -114,7 +124,7 @@ class Inventory:
         item_reference.quantity -= quantity
         if item_reference.quantity <= 0:
             self.remove(item_reference=item_reference)
-        self.__modified()
+        Inventory.__modified()
 
     def validIndex(self, index: int):
         """

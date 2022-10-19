@@ -2,12 +2,11 @@ from Data.Scene.action import Action
 
 
 class Scene:
-    def __init__(self, name: str = "", enterDescription: str = "", exitDescription: str = "", imagePath: str = "",
-                 actions: list[Action] = [], id: int = 0):
+    def __init__(self, name: str = "New Scene", enterDescription: str = "...", exitDescription: str = "You carry on...",
+                 imagePath: str = "", actions: list[Action] = []):
         self.actions: list[Action] = actions
         self._enterDescription = enterDescription
         self._exitDescription = exitDescription
-        self.id = id
         self._imagePath = imagePath
         self._name = name
 
@@ -20,11 +19,6 @@ class Scene:
             action.enabled = other.actions[index].enabled
             action.removed = other.actions[index].removed
             action.selected = other.actions[index].selected
-
-    def __eq__(self, other):
-        if not isinstance(other, Scene):
-            return False
-        return self.id == other.id
 
     def getAction(self, index: int):
         index = abs(index)
