@@ -1,7 +1,7 @@
 [
     {
         "py/object": "Data.Item.item.Item",
-        "name": "New Item",
-        "type": "New Type"
+        "name": "Key",
+        "type": "key"
     }
 ]

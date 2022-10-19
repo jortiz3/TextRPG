@@ -4,10 +4,36 @@
         "actions": [
             {
                 "py/object": "Data.Scene.action.Action",
-                "_description": "New Action",
+                "_description": "Item",
                 "enabled": true,
                 "_disableOnSelect": true,
                 "_id": -777,
+                "removed": false,
+                "_removeOnSelect": false,
+                "_requirement": {
+                    "py/object": "Data.Scene.requirement.Requirement",
+                    "abilities": [],
+                    "items": []
+                },
+                "_reward": {
+                    "py/object": "Data.Scene.reward.Reward",
+                    "experience": 10,
+                    "items": [
+                        {
+                            "py/object": "Data.Item.item_reference.ItemRef",
+                            "id": 0,
+                            "quantity": "1"
+                        }
+                    ]
+                },
+                "selected": false
+            },
+            {
+                "py/object": "Data.Scene.action.Action",
+                "_description": "Next",
+                "enabled": true,
+                "_disableOnSelect": false,
+                "_id": "1",
                 "removed": false,
                 "_removeOnSelect": false,
                 "_requirement": {
@@ -26,6 +52,31 @@
         "_enterDescription": "...",
         "_exitDescription": "You carry on...",
         "_imagePath": "",
-        "_name": "New Scene"
+        "_name": "New Scene 1"
+    },
+    {
+        "py/object": "Data.Scene.scene.Scene",
+        "actions": [
+            {
+                "py/object": "Data.Scene.action.Action",
+                "_description": "New Action",
+                "enabled": true,
+                "_disableOnSelect": false,
+                "_id": "-1",
+                "removed": false,
+                "_removeOnSelect": false,
+                "_requirement": {
+                    "py/id": 11
+                },
+                "_reward": {
+                    "py/id": 14
+                },
+                "selected": false
+            }
+        ],
+        "_enterDescription": "...",
+        "_exitDescription": "You carry on...",
+        "_imagePath": "",
+        "_name": "New Scene 2"
     }
 ]

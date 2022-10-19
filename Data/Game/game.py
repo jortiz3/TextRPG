@@ -53,7 +53,7 @@ class Game:
         save_filepath = self._saveFilepath(save_index)
         if not save_filepath:
             return
-
+        self._sceneManager.reset()
         with open(save_filepath, 'r') as save_file:
             save_data = jsonpickle.decode(save_file.read())
             self._player.copyAttributes(save_data._player)

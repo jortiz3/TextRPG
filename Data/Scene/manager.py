@@ -8,8 +8,7 @@ class SceneManager:
     __default_path = "Data/scenes.json"
 
     def __init__(self, player: Player = Player()):
-        with open(self.__default_path, 'r') as scenes_file:
-            self.scenes: list[Scene] = jsonpickle.decode(scenes_file.read())
+        self.scenes = self._loadScenes()
         self.__player = player
         self.currentSceneIndex = 0
         self.previousSceneIndexes: list[int] = []
@@ -56,6 +55,10 @@ class SceneManager:
             self.current().setReturnAction("Return to {}".format(self.previous().name))
         return None
 
+    def _loadScenes(self):
+        with open(self.__default_path, 'r') as scenes_file:
+            return jsonpickle.decode(scenes_file.read())
+
     def previous(self):
         """Retrieves the previous scene."""
         if len(self.previousSceneIndexes) <= 0:
@@ -68,6 +71,7 @@ class SceneManager:
     def reset(self):
         self.currentSceneIndex = 0
         self.previousSceneIndexes = []
+        self.scenes = self._loadScenes()
 
     def sceneDescription(self):
         """
