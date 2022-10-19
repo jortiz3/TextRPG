@@ -7,7 +7,6 @@ import jsonpickle
 from PyQt5.QtWidgets import QApplication
 
 from Data.Scene.action import Action
-from Data.Scene.handlers import ActionJsonHandler, SceneJsonHandler
 from Data.Scene.manager import SceneManager
 from Data.Character.player import Player
 from Data.Item.item_database import ItemDatabase
@@ -21,8 +20,8 @@ class Game:
         self._sceneManager = SceneManager(self._player)
         self._directory = 'Saves'
         self._fileExtension = "json"
-        # jsonpickle.handlers.register(Scene, SceneJsonHandler, True)
-        # jsonpickle.handlers.register(Action, ActionJsonHandler, True)
+        Action.__getstate__ = Action.getState
+        Scene.__getstate__ = Scene.getState
 
         self._app = QApplication(sys.argv)
         self._ui = UiManager()

@@ -26,6 +26,12 @@ class Scene:
             return self.actions[index]
         return None
 
+    def getState(self):
+        """Override to be used conditionally for json pickling."""
+        return {
+            "actions": self.actions
+        }
+
     def removeAction(self, index: int):
         index = abs(index)
         if index < len(self.actions):

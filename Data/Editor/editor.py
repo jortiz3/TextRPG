@@ -505,12 +505,12 @@ class Editor(QtCore.QObject):
         elif context == "requirement item":
             requirementItems = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items
             self.requirementItemIndex = len(requirementItems)
-            newReqItem = ItemRef(0, 0)
+            newReqItem = ItemRef(0, 1)
             self.undoStack.push(UndoNew(requirementItems, self.requirementItemIndex, newReqItem, description))
         elif context == "reward item":
             rewardItems = self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items
             self.rewardItemIndex = len(rewardItems)
-            newRewardItem = ItemRef(0, 0)
+            newRewardItem = ItemRef(0, 1)
             self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
         elif context == "item":
             self.itemIndex = len(self.items)

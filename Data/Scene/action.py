@@ -22,6 +22,14 @@ class Action:
         otherAction: Action = other
         return self.id == otherAction.id and self._description == otherAction._description
 
+    def getState(self):
+        """Override to be used conditionally for json pickling."""
+        return {
+            "enabled": self.enabled,
+            "removed": self.removed,
+            "selected": self.selected
+        }
+
     def requirementMet(self, player: Player):
         """
         Determines whether the player meets the requirement for this action.
