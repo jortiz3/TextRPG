@@ -1,16 +1,17 @@
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex, Qt, QVariant
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QUndoStack
 
+from Data.Editor.undo_delete import UndoDelete
+from Data.Editor.undo_new import UndoNew
 from Data.Item.item import Item
 
 
 class ItemModel(QAbstractTableModel):
-    def __init__(self, items: list[Item], delete_icon: QIcon, parent: QWidget = None):
+    def __init__(self, items: list[Item], undoStack: QUndoStack, parent: QWidget = None):
         super().__init__(parent)
-        self._items: list[Item] = items
         self._headers = ["NAME", "TYPE"]
-        self._deleteIcon = delete_icon
+        self._items: list[Item] = items
+        self._undoStack: QUndoStack = undoStack
 
     def columnCount(self, parent: QModelIndex = ...) -> int:
         return 2
@@ -43,7 +44,7 @@ class ItemModel(QAbstractTableModel):
     def insertRow(self, row: int, parent: QModelIndex = ...) -> bool:
         if row < 0:
             row = self.rowCount()
-        self._items.insert(row, Item("New Item", "New Type"))
+        self._undoStack.push(UndoNew(self._items, row, Item("New Item", "New Type"), "New Item", self.layoutChanged.emit))
         self.layoutChanged.emit()
         return True
 
@@ -52,7 +53,7 @@ class ItemModel(QAbstractTableModel):
             return False
         if row < 0:
             row = self.rowCount() - 1
-        self._items.pop(row)
+        self._undoStack.push(UndoDelete(self._items, row, "Delete Item", self.layoutChanged.emit))
         self.layoutChanged.emit()
         return True
 

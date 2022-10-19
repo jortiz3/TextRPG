@@ -9,8 +9,8 @@ class ItemView(QTableView):
     def __init__(self, newIcon: QIcon, deleteIcon: QIcon, parent: QWidget = None):
         super().__init__(parent)
         self._deleteIcon: QIcon = deleteIcon
-        self._newIcon: QIcon = newIcon
         self.menu = None
+        self._newIcon: QIcon = newIcon
 
     def contextMenuEvent(self, a0: QContextMenuEvent):
         self.menu = QMenu()

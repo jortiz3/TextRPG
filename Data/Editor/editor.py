@@ -236,7 +236,7 @@ class Editor(QtCore.QObject):
 
         itemTab = QtWidgets.QWidget()
         itemTab.setObjectName("item")
-        self.itemModel = ItemModel(self.items, self.deleteIcon)
+        self.itemModel = ItemModel(self.items, self.undoStack)
         self.itemView = ItemView(self.newIcon, self.deleteIcon, itemTab)
         self.itemView.setModel(self.itemModel)
         self.itemView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -439,6 +439,7 @@ class Editor(QtCore.QObject):
         self.newRewardItemButton.clicked.connect(partial(self.new, "reward item"))
         self.newActionButton.clicked.connect(partial(self.new, "action"))
         self.newSceneButton.clicked.connect(partial(self.new, "scene"))
+        self.itemModel.layoutChanged.connect(self.refresh)
         menuDuplicateAction.triggered.connect(partial(self.duplicate, "action"))
         menuDuplicateScene.triggered.connect(partial(self.duplicate, "scene"))
         menuSave.triggered.connect(self.saveAll)
@@ -468,17 +469,11 @@ class Editor(QtCore.QObject):
         elif context == "reward item":
             deleteIndex = self.rewardItemIndex
             data = self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items
-        elif context == "item":
-            deleteIndex = self.itemIndex
-            data = self.items
-            callback = self.itemModel.layoutChanged.emit
 
         if deleteIndex is not None and data:
             self.previous(context)
             description = "Delete {}".format(context.capitalize())
             self.undoStack.push(UndoDelete(data, deleteIndex, description))
-            if callback:
-                callback()
         self.refresh()
 
     def duplicate(self, target: str):
@@ -531,11 +526,6 @@ class Editor(QtCore.QObject):
             self.rewardItemIndex = len(rewardItems)
             newRewardItem = ItemRef(0, 1)
             self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
-        elif context == "item":
-            self.itemIndex = len(self.items)
-            newItem = Item("New Item", "New Type")
-            self.undoStack.push(UndoNew(self.items, self.itemIndex, newItem, description))
-            self.itemModel.layoutChanged.emit()
         self.refresh()
 
     def next(self, context: str):
