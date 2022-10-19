@@ -6,50 +6,50 @@ from Data.UI.inventory_model import InventoryModel
 from Data.UI.ui import UI
 
 
-class UiGame(UI):  # TODO scroll area for area description
+class UiGame(UI):
     def __init__(self, window: QtWidgets.QMainWindow):
         super().__init__(window, window_name="GameWindow", window_show_size=QtCore.QSize(800, 600),
                          window_title="Text RPG - Exploring the World")
         self._centralWidget = QtWidgets.QWidget(self._window)
         self._centralWidget.setObjectName("centralWidget")
 
-        self._areaGroupBox = QtWidgets.QGroupBox(self._centralWidget)
-        self._areaGroupBox.setMinimumSize(QtCore.QSize(400, 200))
-        self._areaGroupBox.setObjectName("areaGroupBox")
-        self._areaDescriptionLabel = QtWidgets.QLabel(self._areaGroupBox)
-        self._areaDescriptionLabel.setObjectName("areaDescriptionLabel")
-        self._areaDescriptionLabel.setWordWrap(True)
-        self._areaImage = QtWidgets.QLabel(self._areaGroupBox)
-        self._areaImage.setFixedSize(self._defaultIconSize)
-        self._areaImage.setScaledContents(True)
-        self._areaImage.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Raised)
+        self._sceneGroupBox = QtWidgets.QGroupBox(self._centralWidget)
+        self._sceneGroupBox.setMinimumSize(QtCore.QSize(400, 200))
+        self._sceneGroupBox.setObjectName("sceneGroupBox")
+        self._sceneDescriptionLabel = QtWidgets.QLabel(self._sceneGroupBox)
+        self._sceneDescriptionLabel.setObjectName("sceneDescriptionLabel")
+        self._sceneDescriptionLabel.setWordWrap(True)
+        self._sceneImage = QtWidgets.QLabel(self._sceneGroupBox)
+        self._sceneImage.setFixedSize(self._defaultIconSize)
+        self._sceneImage.setScaledContents(True)
+        self._sceneImage.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Raised)
 
-        self._areaGroupBoxLayout = QtWidgets.QGridLayout(self._areaGroupBox)
-        self._areaGroupBoxLayout.addWidget(self._areaDescriptionLabel, 0, 0, 1, 1)
-        self._areaGroupBoxLayout.addWidget(self._areaImage, 0, 1, 1, 1)
-        self._areaGroupBox.setLayout(self._areaGroupBoxLayout)
+        self._sceneGroupBoxLayout = QtWidgets.QGridLayout(self._sceneGroupBox)
+        self._sceneGroupBoxLayout.addWidget(self._sceneDescriptionLabel, 0, 0, 1, 1)
+        self._sceneGroupBoxLayout.addWidget(self._sceneImage, 0, 1, 1, 1)
+        self._sceneGroupBox.setLayout(self._sceneGroupBoxLayout)
 
-        self._areaActionsGroupBox = QtWidgets.QGroupBox(self._centralWidget)
-        self._areaActionsGroupBox.setObjectName("areaActionsGroupBox")
-        self._areaActionsScrollArea = QtWidgets.QScrollArea(self._areaActionsGroupBox)
-        self._areaActionsScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self._areaActionsScrollArea.setWidgetResizable(True)
-        self._areaActionsScrollArea.setObjectName("areaActionsScrollArea")
-        self._areaActionsScrollAreaContent = QtWidgets.QWidget()
-        self._areaActionsScrollAreaContent.setObjectName("areaActionsScrollAreaContent")
-        self._areaActionsScrollAreaLayout = QtWidgets.QGridLayout(self._areaActionsScrollAreaContent)
-        self._areaActionsScrollAreaLayout.setObjectName("scrollAreaLayout")
-        self._areaActionButtons: list[QtWidgets.QPushButton] = []
+        self._sceneActionsGroupBox = QtWidgets.QGroupBox(self._centralWidget)
+        self._sceneActionsGroupBox.setObjectName("sceneActionsGroupBox")
+        self._sceneActionsScrollArea = QtWidgets.QScrollArea(self._sceneActionsGroupBox)
+        self._sceneActionsScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self._sceneActionsScrollArea.setWidgetResizable(True)
+        self._sceneActionsScrollArea.setObjectName("sceneActionsScrollArea")
+        self._sceneActionsScrollAreaContent = QtWidgets.QWidget()
+        self._sceneActionsScrollAreaContent.setObjectName("sceneActionsScrollAreaContent")
+        self._sceneActionsScrollAreaLayout = QtWidgets.QGridLayout(self._sceneActionsScrollAreaContent)
+        self._sceneActionsScrollAreaLayout.setObjectName("scrollAreaLayout")
+        self._sceneActionButtons: list[QtWidgets.QPushButton] = []
         for index in range(15):
-            button = QtWidgets.QPushButton(self._areaActionsScrollAreaContent)
-            button.setObjectName("areaActionButton{}".format(index))
+            button = QtWidgets.QPushButton(self._sceneActionsScrollAreaContent)
+            button.setObjectName("sceneActionButton{}".format(index))
             button.setMinimumSize(self._defaultButtonSize)
-            self._areaActionsScrollAreaLayout.addWidget(button, index, 0, 1, 1)
-            self._areaActionButtons.append(button)
-        self._areaActionsScrollArea.setWidget(self._areaActionsScrollAreaContent)
-        self._areaActionsLayout = QtWidgets.QGridLayout(self._areaActionsGroupBox)
-        self._areaActionsLayout.setObjectName("areaActionsHorizontalLayout")
-        self._areaActionsLayout.addWidget(self._areaActionsScrollArea, 0, 0)
+            self._sceneActionsScrollAreaLayout.addWidget(button, index, 0, 1, 1)
+            self._sceneActionButtons.append(button)
+        self._sceneActionsScrollArea.setWidget(self._sceneActionsScrollAreaContent)
+        self._sceneActionsLayout = QtWidgets.QGridLayout(self._sceneActionsGroupBox)
+        self._sceneActionsLayout.setObjectName("sceneActionsHorizontalLayout")
+        self._sceneActionsLayout.addWidget(self._sceneActionsScrollArea, 0, 0)
 
         self._playerInfoGroupBox = QtWidgets.QGroupBox(self._centralWidget)
         self._playerInfoGroupBox.setMinimumSize(QtCore.QSize(200, 200))
@@ -117,8 +117,8 @@ class UiGame(UI):  # TODO scroll area for area description
 
         self._mainGridLayout = QtWidgets.QGridLayout(self._centralWidget)
         self._mainGridLayout.setObjectName("gridLayout")
-        self._mainGridLayout.addWidget(self._areaGroupBox, 0, 0, 1, 2)
-        self._mainGridLayout.addWidget(self._areaActionsGroupBox, 1, 0, 1, 1)
+        self._mainGridLayout.addWidget(self._sceneGroupBox, 0, 0, 1, 2)
+        self._mainGridLayout.addWidget(self._sceneActionsGroupBox, 1, 0, 1, 1)
         self._mainGridLayout.addWidget(self._playerInfoGroupBox, 1, 1, 1, 1)
         self._centralWidget.setLayout(self._mainGridLayout)
         self._window.setCentralWidget(self._centralWidget)
@@ -135,15 +135,12 @@ class UiGame(UI):  # TODO scroll area for area description
         self._menuResize = QtWidgets.QMenu(self._menuWindow)
         self._menuResize.setObjectName("menuResize")
         self._window.setMenuBar(self._menubar)
-        self._action_0_0 = QtWidgets.QAction(self._window)
-        self._action_0_0.setShortcutVisibleInContextMenu(False)
-        self._action_0_0.setObjectName("action_0_0")
-        self._action_100_100 = QtWidgets.QAction(self._window)
-        self._action_100_100.setShortcutVisibleInContextMenu(False)
-        self._action_100_100.setObjectName("action_100_100")
-        self._action_500_500 = QtWidgets.QAction(self._window)
-        self._action_500_500.setShortcutVisibleInContextMenu(False)
-        self._action_500_500.setObjectName("action_500_500")
+        self._action_topLeft = QtWidgets.QAction(self._window)
+        self._action_topLeft.setShortcutVisibleInContextMenu(False)
+        self._action_topLeft.setObjectName("action_0_0")
+        self._action_recenter = QtWidgets.QAction(self._window)
+        self._action_recenter.setShortcutVisibleInContextMenu(False)
+        self._action_recenter.setObjectName("action_recenter")
         self._action_800x600 = QtWidgets.QAction(self._window)
         self._action_800x600.setShortcutVisibleInContextMenu(False)
         self._action_800x600.setObjectName("action_800x600")
@@ -166,9 +163,8 @@ class UiGame(UI):  # TODO scroll area for area description
         self._menuFile.addAction(self._actionSave)
         self._menuFile.addAction(self._actionLoad)
         self._menuFile.addAction(self._actionQuit)
-        self._menuPosition.addAction(self._action_0_0)
-        self._menuPosition.addAction(self._action_100_100)
-        self._menuPosition.addAction(self._action_500_500)
+        self._menuPosition.addAction(self._action_topLeft)
+        self._menuPosition.addAction(self._action_recenter)
         self._menuResize.addAction(self._action_800x600)
         self._menuResize.addAction(self._action_1280x900)
         self._menuResize.addAction(self._action_1920x1080)
@@ -179,23 +175,22 @@ class UiGame(UI):  # TODO scroll area for area description
         self._menubar.addAction(self._menuWindow.menuAction())
 
         self._getScene = None
-        self._getAreaDescription = None
+        self._getSceneDescription = None
         self._player = None
-        self._action_0_0.triggered.connect(partial(self.reposition_window, 0, 0))
-        self._action_100_100.triggered.connect(partial(self.reposition_window, 100, 100))  # TODO 100 & 500 -> recenter
-        self._action_500_500.triggered.connect(partial(self.reposition_window, 500, 500))
+        self._action_topLeft.triggered.connect(partial(self.reposition_window, 0, 0))
+        self._action_recenter.triggered.connect(self._recenter)
         self._action_800x600.triggered.connect(partial(self.resize_window, 800, 600))
         self._action_1280x900.triggered.connect(partial(self.resize_window, 1280, 900))
         self._action_1920x1080.triggered.connect(partial(self.resize_window, 1920, 1080))
         self._action_2560x1440.triggered.connect(partial(self.resize_window, 2560, 1440))
         QtCore.QMetaObject.connectSlotsByName(self._window)
 
-    def connect(self, get_area=None, get_area_description=None, player=None, save_game=None, select_action=None,
+    def connect(self, get_scene=None, get_scene_description=None, player=None, save_game=None, select_action=None,
                 show_load=None, show_main=None):
-        if get_area:
-            self._getScene = get_area
-        if get_area_description:
-            self._getAreaDescription = get_area_description
+        if get_scene:
+            self._getScene = get_scene
+        if get_scene_description:
+            self._getSceneDescription = get_scene_description
         if player:
             self._player = player
             self._inventoryTable.setModel(InventoryModel(player))
@@ -206,10 +201,10 @@ class UiGame(UI):  # TODO scroll area for area description
         if save_game:
             self._actionSave.triggered.connect(save_game)
         if select_action:
-            for index in range(len(self._areaActionButtons)):
-                area_action_button = self._areaActionButtons[index]
-                area_action_button.clicked.connect(partial(select_action, index))
-                area_action_button.clicked.connect(self.refresh)
+            for index in range(len(self._sceneActionButtons)):
+                scene_action_button = self._sceneActionButtons[index]
+                scene_action_button.clicked.connect(partial(select_action, index))
+                scene_action_button.clicked.connect(self.refresh)
         if show_load:
             self._actionLoad.triggered.connect(show_load)
         if show_main:
@@ -223,16 +218,16 @@ class UiGame(UI):  # TODO scroll area for area description
         if self._getScene:
             scene = self._getScene()
             scene_name = scene.name
-            self._areaImage.setPixmap(QtGui.QPixmap(scene.imagePath))
-        self._areaGroupBox.setTitle(self._translate(self._window_name, scene_name))
+            self._sceneImage.setPixmap(QtGui.QPixmap(scene.imagePath))
+        self._sceneGroupBox.setTitle(self._translate(self._window_name, scene_name))
 
-        area_description = ""
-        if self._getAreaDescription:
-            area_description = self._getAreaDescription()
-        self._areaDescriptionLabel.setText(self._translate(self._window_name, area_description))
-        self._areaActionsGroupBox.setTitle(self._translate(self._window_name, "Scene Actions"))
+        scene_description = ""
+        if self._getSceneDescription:
+            scene_description = self._getSceneDescription()
+        self._sceneDescriptionLabel.setText(self._translate(self._window_name, scene_description))
+        self._sceneActionsGroupBox.setTitle(self._translate(self._window_name, "Scene Actions"))
 
-        for index, action_button in enumerate(self._areaActionButtons):
+        for index, action_button in enumerate(self._sceneActionButtons):
             if scene:
                 action = scene.getAction(index)
                 if action:
@@ -308,12 +303,10 @@ class UiGame(UI):  # TODO scroll area for area description
         self._menuPosition.setTitle(self._translate(self._window_name, "Position"))
         self._menuResize.setTitle(self._translate(self._window_name, "Resize"))
 
-        self._action_0_0.setText(self._translate(self._window_name, "(0, 0)"))
-        self._action_0_0.setToolTip(self._translate(self._window_name, "Set the window position"))
-        self._action_100_100.setText(self._translate(self._window_name, "(0, 100)"))
-        self._action_100_100.setToolTip(self._translate(self._window_name, "Set the window position"))
-        self._action_500_500.setText(self._translate(self._window_name, "(500, 500)"))
-        self._action_500_500.setToolTip(self._translate(self._window_name, "Set the window position"))
+        self._action_topLeft.setText(self._translate(self._window_name, "Top-Left Corner"))
+        self._action_topLeft.setToolTip(self._translate(self._window_name, "Set the window position"))
+        self._action_recenter.setText(self._translate(self._window_name, "Center"))
+        self._action_recenter.setToolTip(self._translate(self._window_name, "Set the window position"))
 
         self._action_800x600.setText(self._translate(self._window_name, "800 x 600"))
         self._action_1280x900.setText(self._translate(self._window_name, "1280 x 720"))

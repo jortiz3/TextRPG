@@ -2,9 +2,9 @@ import copy
 import sys
 from functools import partial
 from os.path import exists
-from typing import Union, Type
 
-import jsons
+import jsonpickle
+
 from PyQt5 import Qt, QtCore, QtGui, QtWidgets
 
 from Data.Character.ability import Ability
@@ -15,8 +15,6 @@ from Data.Editor.undo_new import UndoNew
 from Data.Item.item_reference import ItemRef
 from Data.Scene.scene import Scene
 from Data.Scene.action import Action
-from Data.Scene.requirement import Requirement
-from Data.Scene.reward import Reward
 from Data.Item.item import Item
 
 
@@ -26,8 +24,8 @@ class Editor(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self.items: list[Item] = self.load(self.__path_items, list[Item])
-        self.scenes: list[Scene] = self.load(self.__path_scenes, list[Scene])
+        self.items: list[Item] = self.load(self.__path_items)
+        self.scenes: list[Scene] = self.load(self.__path_scenes)
         self.actionIndex = 0
         self.sceneIndex = 0
         self.itemIndex = 0
@@ -381,25 +379,25 @@ class Editor(QtCore.QObject):
             partial(self.set, "scene.enterDescription", self.enterDescriptionInput))
         self.exitDescriptionInput.textChanged.connect(
             partial(self.set, "scene.exitDescription", self.exitDescriptionInput))
-        self.actionIdInput.editingFinished.connect(partial(self.set, "action.id", self.actionIdInput))
+        self.actionIdInput.editingFinished.connect(partial(self.set, "action._id", self.actionIdInput))
         self.actionDescriptionInput.editingFinished.connect(
             partial(self.set, "action.description", self.actionDescriptionInput))
         self.disableOnSelectCheck.clicked.connect(
             partial(self.set, "action.disableOnSelect", self.disableOnSelectCheck))
-        self.removeOnSelectCheck.clicked.connect(partial(self.set, "action.removeOnSelect", self.removeOnSelectCheck))
+        self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
         self.requirementAbilityInput.editingFinished.connect(
-            partial(self.set, "action.requirement.ability.name", self.requirementAbilityInput))
+            partial(self.set, "action._requirement.ability.name", self.requirementAbilityInput))
         self.requirementScoreInput.editingFinished.connect(
-            partial(self.set, "action.requirement.ability.score", self.requirementScoreInput))
+            partial(self.set, "action._requirement.ability.score", self.requirementScoreInput))
         self.requirementItemIdInput.editingFinished.connect(
-            partial(self.set, "action.requirement.item.id", self.requirementItemIdInput))
+            partial(self.set, "action._requirement.item.id", self.requirementItemIdInput))
         self.requirementItemQtyInput.editingFinished.connect(
-            partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput))
+            partial(self.set, "action._requirement.item.quantity", self.requirementItemQtyInput))
         self.rewardExpInput.editingFinished.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
         self.rewardItemIdInput.editingFinished.connect(
-            partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
+            partial(self.set, "action._reward.item.id", self.rewardItemIdInput))
         self.rewardItemQtyInput.editingFinished.connect(
-            partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
+            partial(self.set, "action._reward.item.quantity", self.rewardItemQtyInput))
         self.sceneIndexInput.editingFinished.connect(partial(self.setIndex, "scene", self.sceneIndexInput))
         self.actionIndexInput.editingFinished.connect(partial(self.setIndex, "action", self.actionIndexInput))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
@@ -423,7 +421,7 @@ class Editor(QtCore.QObject):
         self.newActionButton.clicked.connect(partial(self.new, "action"))
         self.newSceneButton.clicked.connect(partial(self.new, "scene"))
         menuDuplicateAction.triggered.connect(partial(self.duplicate, "action"))
-        menuDuplicateScene.triggered.connect(self.duplicate)
+        menuDuplicateScene.triggered.connect(partial(self.duplicate, "scene"))
         menuSave.triggered.connect(self.saveAll)
         self.menuUndo.triggered.connect(self.undo)
         self.menuRedo.triggered.connect(self.redo)
@@ -464,7 +462,9 @@ class Editor(QtCore.QObject):
                 callback()
         self.refresh()
 
-    def duplicate(self, target: str = "scene"):
+    def duplicate(self, target: str):
+        if len(self.scenes) < 1:
+            return
         scene = self.scenes[self.sceneIndex]
         if target == "scene":
             duplicateScene = copy.deepcopy(scene)
@@ -477,42 +477,40 @@ class Editor(QtCore.QObject):
             duplicateAction = copy.deepcopy(actions[self.actionIndex])
             self.actionIndex = len(actions)
             actions.append(duplicateAction)
+        self.refresh()
 
     @staticmethod
-    def load(path: str, data_type: Type[list[Union[Item, Scene]]]):
-        data: data_type = []
-        if exists(path):
-            with open(path, 'r') as file:
-                data: data_type = jsons.loads(file.read())
-        return data
+    def load(path: str):
+        if not exists(path):
+            return []
+        with open(path, 'r') as file:
+            return jsonpickle.decode(file.read())
 
     def new(self, context: str):
         description = "New {}".format(context.capitalize())
         if context == "scene":
             self.sceneIndex = len(self.scenes)
-            newScene = Scene("New Scene", "New Enter Description", "You carry on...", "", [])
+            newScene = Scene()
             self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
             self.actionIndex = len(actions)
-            newAction = Action(requirement=Requirement([], []), reward=Reward(0, []))
+            newAction = Action()
             self.undoStack.push(UndoNew(actions, self.actionIndex, newAction, description))
         elif context == "requirement ability":
             abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
             self.requirementAbilityIndex = len(abilities)
             newAbility = Ability("dexterity")
-            self.undoStack.push(
-                UndoNew(abilities, self.requirementAbilityIndex, newAbility, description))
+            self.undoStack.push(UndoNew(abilities, self.requirementAbilityIndex, newAbility, description))
         elif context == "requirement item":
             requirementItems = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items
             self.requirementItemIndex = len(requirementItems)
-            newReqItem = ItemRef(0, 0)
-            self.undoStack.push(
-                UndoNew(requirementItems, self.requirementItemIndex, newReqItem, description))
+            newReqItem = ItemRef(0, 1)
+            self.undoStack.push(UndoNew(requirementItems, self.requirementItemIndex, newReqItem, description))
         elif context == "reward item":
             rewardItems = self.scenes[self.sceneIndex].actions[self.actionIndex].reward.items
             self.rewardItemIndex = len(rewardItems)
-            newRewardItem = ItemRef(0, 0)
+            newRewardItem = ItemRef(0, 1)
             self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
         elif context == "item":
             self.itemIndex = len(self.items)
@@ -612,31 +610,29 @@ class Editor(QtCore.QObject):
                 self.disableOnSelectCheck.setChecked(action.disableOnSelect)
                 self.removeOnSelectCheck.setChecked(action.removeOnSelect)
 
+            requirement = action.requirement if actionAvailable else None
             requirementAbilityAvailable = bool(
-                actionAvailable and action.requirement.abilities and self.requirementAbilityIndex < len(
-                    action.requirement.abilities))
+                requirement and requirement.abilities and self.requirementAbilityIndex < len(requirement.abilities))
             if requirementAbilityAvailable:
-                ability = action.requirement.abilities[self.requirementAbilityIndex]
+                ability = requirement.abilities[self.requirementAbilityIndex]
                 self.requirementAbilityInput.setText(ability.name)
                 self.requirementScoreInput.setText(str(ability.score))
 
             requirementItemAvailable = bool(
-                actionAvailable and action.requirement and action.requirement.items and self.requirementItemIndex < len(
-                    action.requirement.items))
+                requirement and requirement.items and self.requirementItemIndex < len(requirement.items))
             if requirementItemAvailable:
-                requiredItem = action.requirement.items[self.requirementItemIndex]
+                requiredItem = requirement.items[self.requirementItemIndex]
                 self.requirementItemIdInput.setText(str(requiredItem.id))
                 self.requirementItemQtyInput.setText(str(requiredItem.quantity))
 
-            rewardExperienceAvailable = bool(actionAvailable and action.reward and action.reward.experience is not None)
+            reward = action.reward if actionAvailable else None
+            rewardExperienceAvailable = bool(reward and reward.experience is not None)
             if rewardExperienceAvailable:
-                self.rewardExpInput.setText(str(action.reward.experience))
+                self.rewardExpInput.setText(str(reward.experience))
 
-            rewardItemAvailable = bool(
-                actionAvailable and action.reward and action.reward.items and self.rewardItemIndex < len(
-                    action.reward.items))
+            rewardItemAvailable = bool(reward and reward.items and self.rewardItemIndex < len(reward.items))
             if rewardItemAvailable:
-                rewardItem = action.reward.items[self.rewardItemIndex]
+                rewardItem = reward.items[self.rewardItemIndex]
                 self.rewardItemIdInput.setText(str(rewardItem.id))
                 self.rewardItemQtyInput.setText(str(rewardItem.quantity))
 
@@ -689,9 +685,9 @@ class Editor(QtCore.QObject):
 
     @staticmethod
     def save(path: str, data):
-        args = {"indent": 4, "sort_keys": True}
+        # args = {"indent": 4, "sort_keys": True}
         with open(path, 'w') as file:
-            file.write(jsons.dumps(data, jdkwargs=args, verbose=True))
+            file.write(jsonpickle.encode(data, indent=4))
 
     def saveAll(self):
         self.save(self.__path_items, self.items)
@@ -752,4 +748,3 @@ class Editor(QtCore.QObject):
         context = context[context.find(" ") + 1:]
         function(context)
         self.refresh()
-

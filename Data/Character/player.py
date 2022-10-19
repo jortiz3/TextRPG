@@ -1,6 +1,6 @@
+from Data.Character.ability import Ability
 from Data.Character.character import Character
 from Data.Item.inventory import Inventory
-from Data.Item.item_reference import ItemRef
 
 
 class Player(Character):
@@ -10,10 +10,9 @@ class Player(Character):
     __min_ability_score = 0
     __required_experience_scale = 50
 
-    def __init__(self, name="New Player", strength=1.0, dexterity=1.0, intelligence=1.0,
-                 will=1.0, wisdom=1.0, level=1, experience=0, ability_points=5,
+    def __init__(self, name="New Player", abilities: list[Ability] = [], level=1, experience=0, ability_points=5,
                  inventory=Inventory()):
-        super().__init__(name, strength, dexterity, intelligence, will, wisdom, inventory)
+        super().__init__(name, abilities, inventory)
         self.ability_points = ability_points
         self.experience = experience
         self.level = level
@@ -36,11 +35,14 @@ class Player(Character):
             self.resetAttributes()
             return
         self.name = other.name
-        self.abilities = other.abilities
         self.level = other.level
         self.experience = other.experience
         self.ability_points = other.ability_points
         self.inventory = other.inventory
+        if len(self.abilities) != len(other.abilities):
+            return
+        for index, ability in enumerate(self.abilities):
+            ability.score = other.abilities[index].score
 
     def requiredExperience(self):
         """
@@ -69,7 +71,7 @@ class Player(Character):
         if self.ability_points - amount < 0:
             return
 
-        ability = self.abilities[ability_name.lower()]
+        ability = self.ability(ability_name, "ability")
         new_score = ability.score + amount
         if new_score < self.__min_ability_score or new_score > self.__max_ability_score:
             return

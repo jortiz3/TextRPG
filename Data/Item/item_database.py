@@ -1,6 +1,6 @@
 import copy
 
-import jsons
+import jsonpickle
 
 from Data.Item.item import Item
 
@@ -12,7 +12,7 @@ class ItemDatabase:
     @staticmethod
     def initialize():
         with open(ItemDatabase.__db_path, 'r') as itemdb:
-            ItemDatabase.__db = jsons.loads(itemdb.read(), cls=list[Item])
+            ItemDatabase.__db = jsonpickle.decode(itemdb.read())
 
     @staticmethod
     def get(db_id: int) -> Item:

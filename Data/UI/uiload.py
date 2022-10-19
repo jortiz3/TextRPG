@@ -75,7 +75,7 @@ class UiLoad(UI):
 
         for index in range(slots_available, quantity):
             groupBox = QtWidgets.QGroupBox(self._scrollAreaContent)
-            groupBox.setObjectName("areaActionsGroupBox")
+            groupBox.setObjectName("sceneActionsGroupBox")
             self._groupBoxes.append(groupBox)
             layout = QtWidgets.QHBoxLayout(groupBox)
             layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)

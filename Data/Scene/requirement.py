@@ -4,9 +4,9 @@ from Data.Item.item_reference import ItemRef
 
 
 class Requirement:
-    def __init__(self, abilities: list[Ability] = None, items: list[ItemRef] = None):
-        self.abilities = abilities
-        self.items = items
+    def __init__(self, abilities: list[Ability] = [], items: list[ItemRef] = []):
+        self.abilities: list[Ability] = abilities
+        self.items: list[ItemRef] = items
 
     def consume(self, character: Character):
         """
@@ -24,7 +24,7 @@ class Requirement:
         :return: True if all requirements are met.
         """
         for ability in self.abilities:
-            if character.ability(ability.name) < ability.score:
+            if character.ability(ability.name, "score") < ability.score:
                 return False
 
         if self.items:

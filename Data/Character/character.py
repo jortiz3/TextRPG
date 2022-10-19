@@ -6,27 +6,31 @@ from Data.Item.item_reference import ItemRef
 
 
 class Character:
+    __default_abilities = [
+        Ability("dexterity", "Ability checks and run chance", 1.0),
+        Ability("intelligence", "Ability checks and enchanting", 1.0),
+        Ability("strength", "Ability checks and crafting", 1.0),
+        Ability("will", "Ability checks and crafting", 1.0),
+        Ability("wisdom", "Ability checks and enchanting", 1.0),
+    ]
     __round_digits = 2
 
-    def __init__(self, name="", strength=1.0, dexterity=1.0, intelligence=1.0, will=1.0, wisdom=1.0,
-                 inventory=Inventory()):
-        self.abilities: dict[str, Ability] = {
-            "dexterity": Ability("dexterity", "Ability checks and run chance", dexterity),
-            "intelligence": Ability("intelligence", "Ability checks and enchanting", intelligence),
-            "strength": Ability("strength", "Ability checks and crafting", strength),
-            "will": Ability("will", "Ability checks and crafting", will),
-            "wisdom": Ability("wisdom", "Ability checks and enchanting", wisdom)}
+    def __init__(self, name="", abilities: list[Ability] = [], inventory=Inventory()):
+        self.abilities = abilities if len(abilities) > 0 else self.__default_abilities
         self.inventory = inventory
         self.name = name
 
     def ability(self, name: str, context: str = "score"):
-        ability = self.abilities[name.lower()]
-        if context == "score":
-            return ability.score
-        elif context == "description":
-            return ability.description
-        else:
-            return ability.name
+        name = name.lower()
+        for ability in self.abilities:
+            if ability.name != name:
+                continue
+            if context == "ability":
+                return ability
+            elif context == "description":
+                return ability.description
+            else:
+                return ability.score
 
     def craftingBonus(self):
         bonus = self.ability("will")
