@@ -1,7 +1,30 @@
 [
     {
         "py/object": "Data.Scene.scene.Scene",
-        "actions": [],
+        "actions": [
+            {
+                "py/object": "Data.Scene.action.Action",
+                "_consequence": "You did the thing",
+                "_description": "Do the thing",
+                "enabled": true,
+                "_disableOnSelect": false,
+                "_id": -777,
+                "removed": false,
+                "_removeOnSelect": false,
+                "_requirement": {
+                    "py/object": "Data.Scene.requirement.Requirement",
+                    "abilities": [],
+                    "items": []
+                },
+                "_reward": {
+                    "py/object": "Data.Scene.reward.Reward",
+                    "experience": 10,
+                    "items": []
+                },
+                "_secret": false,
+                "selected": false
+            }
+        ],
         "_description": "You find yourself in a clearing with tall grass surrounded by trees where the sound of chirping can be heard and a gentle breeze can be felt. At the center of the clearing is a giant tree with a hole in its trunk. To your side, there is a trail leading into the forest.",
         "_imagePath": "Data/Images/Scene/forest.png",
         "_name": "Forest of Awakening, Clearing",

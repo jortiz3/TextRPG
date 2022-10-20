@@ -40,11 +40,12 @@ class Editor(QtCore.QObject):
 
     def __initializeUi(self):
         self.checkIcon = QtGui.QIcon("Data/Images/UI/check.png")
-        self.deleteIcon = QtGui.QIcon("Data/Images/UI/x.png")
+        self.deleteIcon = QtGui.QIcon("Data/Images/UI/delete.png")
         self.editorIcon = QtGui.QIcon("Data/Images/UI/editor.png")
         self.folderIcon = QtGui.QIcon("Data/Images/UI/folder.png")
         self.gearIcon = QtGui.QIcon("Data/Images/UI/gear.png")
         self.newIcon = QtGui.QIcon("Data/Images/UI/plus.png")
+        self.newItemIcon = QtGui.QIcon("Data/Images/UI/new.png")
         self.nextIcon = QtGui.QIcon("Data/Images/UI/next.png")
         self.previousIcon = QtGui.QIcon("Data/Images/UI/previous.png")
 
@@ -275,7 +276,7 @@ class Editor(QtCore.QObject):
         itemTab = QtWidgets.QWidget()
         itemTab.setObjectName("item")
         self.itemModel = ItemModel(self.items, self.undoStack)
-        self.itemView = ItemView(self.newIcon, self.deleteIcon, itemTab)
+        self.itemView = ItemView(self.newItemIcon, self.deleteIcon, itemTab)
         self.itemView.setModel(self.itemModel)
         self.itemView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
@@ -430,7 +431,7 @@ class Editor(QtCore.QObject):
         self.actionDescriptionInput.editingFinished.connect(
             partial(self.set, "action.description", self.actionDescriptionInput))
         self.actionConsequenceInput.editingFinished.connect(
-            partial(self.set, "action.consequence", self.actionConsequenceInput))
+            partial(self.set, "action._consequence", self.actionConsequenceInput))
         self.actionSecretCheck.clicked.connect(
             partial(self.set, "action.secret", self.actionSecretCheck))
         self.disableOnSelectCheck.clicked.connect(

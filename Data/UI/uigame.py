@@ -237,10 +237,10 @@ class UiGame(UI):
                         if action.selected:
                             icon = self._checkIcon
                         elif not requirementMet:
-                            icon = self._xIcon
+                            icon = self._requirementIcon
                         action_button.setIcon(icon)
                         action_button.setEnabled(action.enabled)
-                        action_button.setText(self._translate(self._window_name, action.description()))
+                        action_button.setText(self._translate(self._window_name, action.getDescription()))
                         action_button.show()
                         continue
             action_button.hide()
