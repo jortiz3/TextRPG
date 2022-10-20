@@ -1,7 +1,112 @@
 [
     {
         "py/object": "Data.Item.item.Item",
-        "name": "Key",
+        "name": "Key Tree",
         "type": "key"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Rusty Key",
+        "type": "key"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Copper Key",
+        "type": "key"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Iron Key",
+        "type": "key"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Silver Key",
+        "type": "key"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Crowbar",
+        "type": "tool"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Hammer",
+        "type": "tool"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Shovel",
+        "type": "tool"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Pickaxe",
+        "type": "tool"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Banana",
+        "type": "food"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Berry",
+        "type": "food"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Sweet Roll",
+        "type": "food"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Spoiled Meat",
+        "type": "food"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Human Limb",
+        "type": "food"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Feces",
+        "type": "material"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Rabbit's Foot",
+        "type": "material"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Bear Claw",
+        "type": "material"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Iron Ore",
+        "type": "material"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Silver Ore",
+        "type": "material"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Daisy",
+        "type": "flower"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Daffodil",
+        "type": "flower"
+    },
+    {
+        "py/object": "Data.Item.item.Item",
+        "name": "Rose",
+        "type": "flower"
     }
 ]
