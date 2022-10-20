@@ -412,7 +412,7 @@ class Editor(QtCore.QObject):
         self.disableOnSelectCheck.clicked.connect(
             partial(self.set, "action.disableOnSelect", self.disableOnSelectCheck))
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
-        self.requirementAbilityComboBox.currentTextChanged.connect(
+        self.requirementAbilityComboBox.textActivated.connect(
             partial(self.set, "action.requirement.ability.name", self.requirementAbilityComboBox))
         self.requirementScoreInput.editingFinished.connect(
             partial(self.set, "action.requirement.ability.score", self.requirementScoreInput))
@@ -528,6 +528,8 @@ class Editor(QtCore.QObject):
             self.undoStack.push(UndoNew(actions, self.actionIndex, newAction, description))
         elif context == "requirement ability":
             abilities = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.abilities
+            if len(abilities) >= len(self.__ability_names):
+                return
             self.requirementAbilityIndex = len(abilities)
             newAbility = Ability("dexterity")
             self.undoStack.push(UndoNew(abilities, self.requirementAbilityIndex, newAbility, description))
@@ -777,7 +779,6 @@ class Editor(QtCore.QObject):
 
     @staticmethod
     def save(path: str, data):
-        # args = {"indent": 4, "sort_keys": True}
         with open(path, 'w') as file:
             file.write(jsonpickle.encode(data, indent=4))
 
