@@ -61,9 +61,10 @@ class Editor(QtCore.QObject):
 
         self.undoStack = QtWidgets.QUndoStack(self.window)
 
-        sceneTab = QtWidgets.QTabWidget(self.centralTabWidget)
-        sceneTab.setObjectName("scene")
-        infoTab = QtWidgets.QWidget(sceneTab)
+        sceneTabCentralWidget = QtWidgets.QWidget(self.centralTabWidget)
+        sceneTabWidget = QtWidgets.QTabWidget(sceneTabCentralWidget)
+        sceneTabWidget.setObjectName("scene")
+        infoTab = QtWidgets.QWidget(sceneTabWidget)
         sceneNameLabel = QtWidgets.QLabel(infoTab)
         sceneNameLabel.setText("Name:")
         sceneNameLabel.setToolTip("Name of the scene.")
@@ -83,28 +84,32 @@ class Editor(QtCore.QObject):
         self.imagePathButton = QtWidgets.QPushButton(infoTab)
         self.imagePathButton.setIcon(self.folderIcon)
         self.imagePathButton.setFixedSize(buttonSize)
-        self.sceneIndexInput = QtWidgets.QLineEdit(infoTab)
+        sceneIndexLabel = QtWidgets.QLabel(sceneTabCentralWidget)
+        sceneIndexLabel.setText("Scene:")
+        sceneIndexLabel.setAlignment(QtCore.Qt.AlignRight)
+        sceneIndexLabel.setFixedWidth(indexLabelWidth)
+        self.sceneIndexInput = QtWidgets.QLineEdit(sceneTabCentralWidget)
         self.sceneIndexInput.setMaximumWidth(indexLabelWidth)
         self.sceneIndexInput.setAlignment(QtCore.Qt.AlignCenter)
         self.sceneIndexInput.setToolTip("Scene Index")
-        self.previousSceneButton = QtWidgets.QPushButton(infoTab)
+        self.previousSceneButton = QtWidgets.QPushButton(sceneTabCentralWidget)
         self.previousSceneButton.setToolTip("Previous Scene")
         self.previousSceneButton.setIcon(self.previousIcon)
         self.previousSceneButton.setFixedSize(buttonSize)
-        self.deleteSceneButton = QtWidgets.QPushButton(infoTab)
+        self.deleteSceneButton = QtWidgets.QPushButton(sceneTabCentralWidget)
         self.deleteSceneButton.setToolTip("Delete Scene")
         self.deleteSceneButton.setIcon(self.deleteIcon)
         self.deleteSceneButton.setFixedSize(buttonSize)
-        self.newSceneButton = QtWidgets.QPushButton(infoTab)
+        self.newSceneButton = QtWidgets.QPushButton(sceneTabCentralWidget)
         self.newSceneButton.setToolTip("New Scene")
         self.newSceneButton.setIcon(self.newIcon)
         self.newSceneButton.setFixedSize(buttonSize)
-        self.nextSceneButton = QtWidgets.QPushButton(infoTab)
+        self.nextSceneButton = QtWidgets.QPushButton(sceneTabCentralWidget)
         self.nextSceneButton.setToolTip("Next Scene")
         self.nextSceneButton.setIcon(self.nextIcon)
         self.nextSceneButton.setFixedSize(buttonSize)
 
-        actionTab = QtWidgets.QWidget(sceneTab)
+        actionTab = QtWidgets.QWidget(sceneTabWidget)
         actionTab.setObjectName("action")
         actionDescriptionLabel = QtWidgets.QLabel(actionTab)
         actionDescriptionLabel.setText("Description:")
@@ -128,10 +133,10 @@ class Editor(QtCore.QObject):
         removeOnSelectLabel.setAlignment(QtCore.Qt.AlignRight)
         self.removeOnSelectCheck = QtWidgets.QCheckBox(actionTab)
         self.removeOnSelectCheck.setFixedWidth(indexLabelWidth)
-        self.actionIndexInput = QtWidgets.QLineEdit(actionTab)
-        self.actionIndexInput.setMaximumWidth(indexLabelWidth)
-        self.actionIndexInput.setAlignment(QtCore.Qt.AlignCenter)
-        self.actionIndexInput.setToolTip("Action Index")
+        self.actionIndexLabel = QtWidgets.QLabel(actionTab)
+        self.actionIndexLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.actionIndexLabel.setFixedWidth(indexLabelWidth)
+        self.actionIndexLabel.setToolTip("Action Index")
         self.previousActionButton = QtWidgets.QPushButton(actionTab)
         self.previousActionButton.setToolTip("Previous Action")
         self.previousActionButton.setIcon(self.previousIcon)
@@ -291,44 +296,43 @@ class Editor(QtCore.QObject):
         menuBar.addMenu(menuEdit)
         self.window.setMenuBar(menuBar)
 
-        sceneNavLayout = QtWidgets.QGridLayout()
-        sceneNavLayout.addWidget(self.previousSceneButton, 0, 0, 1, 1)
-        sceneNavLayout.addWidget(self.sceneIndexInput, 0, 1, 1, 1)
-        sceneNavLayout.addWidget(self.nextSceneButton, 0, 2, 1, 1)
-        sceneNavLayout.addWidget(self.newSceneButton, 0, 3, 1, 1)
-        sceneNavLayout.addWidget(self.deleteSceneButton, 0, 4, 1, 1)
+        sceneNavLayout = QtWidgets.QHBoxLayout()
+        sceneNavLayout.setAlignment(QtCore.Qt.AlignLeft)
+        sceneNavLayout.addWidget(self.previousSceneButton)
+        sceneNavLayout.addWidget(sceneIndexLabel)
+        sceneNavLayout.addWidget(self.sceneIndexInput)
+        sceneNavLayout.addWidget(self.nextSceneButton)
+        sceneNavLayout.addWidget(self.newSceneButton)
+        sceneNavLayout.addWidget(self.deleteSceneButton)
 
-        sceneGroupBoxLayout = QtWidgets.QGridLayout(infoTab)
-        sceneGroupBoxLayout.addLayout(sceneNavLayout, 0, 0, 1, 2)
-        sceneGroupBoxLayout.addWidget(sceneNameLabel, 1, 0, 1, 1)
-        sceneGroupBoxLayout.addWidget(self.sceneNameInput, 1, 1, 1, 2)
-        sceneGroupBoxLayout.addWidget(imagePathLabel, 2, 0, 1, 1)
-        sceneGroupBoxLayout.addWidget(self.imagePathInput, 2, 1, 1, 1)
-        sceneGroupBoxLayout.addWidget(self.imagePathButton, 2, 2, 1, 1)
-        sceneGroupBoxLayout.addWidget(enterDescriptionLabel, 3, 0, 1, 1)
-        sceneGroupBoxLayout.addWidget(self.enterDescriptionInput, 3, 1, 1, 2)
-        sceneGroupBoxLayout.addWidget(exitDescriptionLabel, 4, 0, 1, 1)
-        sceneGroupBoxLayout.addWidget(self.exitDescriptionInput, 4, 1, 1, 2)
-        infoTab.setLayout(sceneGroupBoxLayout)
-        sceneTab.addTab(infoTab, "Info")
+        infoTabLayout = QtWidgets.QGridLayout(infoTab)
+        infoTabLayout.addWidget(sceneNameLabel, 1, 0, 1, 1)
+        infoTabLayout.addWidget(self.sceneNameInput, 1, 1, 1, 2)
+        infoTabLayout.addWidget(imagePathLabel, 2, 0, 1, 1)
+        infoTabLayout.addWidget(self.imagePathInput, 2, 1, 1, 1)
+        infoTabLayout.addWidget(self.imagePathButton, 2, 2, 1, 1)
+        infoTabLayout.addWidget(enterDescriptionLabel, 3, 0, 1, 1)
+        infoTabLayout.addWidget(self.enterDescriptionInput, 3, 1, 1, 2)
+        infoTabLayout.addWidget(exitDescriptionLabel, 4, 0, 1, 1)
+        infoTabLayout.addWidget(self.exitDescriptionInput, 4, 1, 1, 2)
+        infoTab.setLayout(infoTabLayout)
+        sceneTabWidget.addTab(infoTab, "Info")
 
-        hSpacerItem = QtWidgets.QSpacerItem(buttonSize.width(), buttonSize.height(), Qt.QSizePolicy.Policy.Expanding)
         requirementAbilityNavLayout = QtWidgets.QHBoxLayout()
+        requirementAbilityNavLayout.setAlignment(QtCore.Qt.AlignLeft)
         requirementAbilityNavLayout.addWidget(self.previousRequirementAbilityButton)
         requirementAbilityNavLayout.addWidget(self.requirementAbilityIndexLabel)
         requirementAbilityNavLayout.addWidget(self.nextRequirementAbilityButton)
         requirementAbilityNavLayout.addWidget(self.newRequirementAbilityButton)
         requirementAbilityNavLayout.addWidget(self.deleteRequirementAbilityButton)
-        requirementAbilityNavLayout.addItem(hSpacerItem)
 
-        hSpacerItem = QtWidgets.QSpacerItem(buttonSize.width(), buttonSize.height(), Qt.QSizePolicy.Policy.Expanding)
         requirementItemNavLayout = QtWidgets.QHBoxLayout()
+        requirementItemNavLayout.setAlignment(QtCore.Qt.AlignLeft)
         requirementItemNavLayout.addWidget(self.previousRequirementItemButton)
         requirementItemNavLayout.addWidget(self.requirementItemIndexLabel)
         requirementItemNavLayout.addWidget(self.nextRequirementItemButton)
         requirementItemNavLayout.addWidget(self.newRequirementItemButton)
         requirementItemNavLayout.addWidget(self.deleteRequirementItemButton)
-        requirementItemNavLayout.addItem(hSpacerItem)
 
         requirementGroupBoxLayout = QtWidgets.QGridLayout(requirementGroupBox)
         requirementGroupBoxLayout.addLayout(requirementAbilityNavLayout, 0, 0, 1, 1)
@@ -343,14 +347,13 @@ class Editor(QtCore.QObject):
         requirementGroupBoxLayout.addWidget(self.requirementItemQtyInput, 1, 4, 1, 1)
         requirementGroupBox.setLayout(requirementGroupBoxLayout)
 
-        hSpacerItem = QtWidgets.QSpacerItem(buttonSize.width(), buttonSize.height(), Qt.QSizePolicy.Policy.Expanding)
         rewardItemNavLayout = QtWidgets.QHBoxLayout()
+        rewardItemNavLayout.setAlignment(QtCore.Qt.AlignLeft)
         rewardItemNavLayout.addWidget(self.previousRewardItemButton)
         rewardItemNavLayout.addWidget(self.rewardItemIndexLabel)
         rewardItemNavLayout.addWidget(self.nextRewardItemButton)
         rewardItemNavLayout.addWidget(self.newRewardItemButton)
         rewardItemNavLayout.addWidget(self.deleteRewardItemButton)
-        rewardItemNavLayout.addItem(hSpacerItem)
 
         rewardGroupBoxLayout = QtWidgets.QGridLayout(rewardGroupBox)
         rewardGroupBoxLayout.addWidget(rewardExpLabel, 0, 1, 1, 1)
@@ -362,14 +365,13 @@ class Editor(QtCore.QObject):
         rewardGroupBoxLayout.addWidget(self.rewardItemQtyInput, 1, 4, 1, 1)
         rewardGroupBox.setLayout(rewardGroupBoxLayout)
 
-        hSpacerItem = QtWidgets.QSpacerItem(buttonSize.width(), buttonSize.height(), Qt.QSizePolicy.Policy.Expanding)
         actionNavLayout = QtWidgets.QHBoxLayout()
+        actionNavLayout.setAlignment(QtCore.Qt.AlignLeft)
         actionNavLayout.addWidget(self.previousActionButton)
-        actionNavLayout.addWidget(self.actionIndexInput)
+        actionNavLayout.addWidget(self.actionIndexLabel)
         actionNavLayout.addWidget(self.nextActionButton)
         actionNavLayout.addWidget(self.newActionButton)
         actionNavLayout.addWidget(self.deleteActionButton)
-        actionNavLayout.addItem(hSpacerItem)
 
         actionGroupBoxLayout = QtWidgets.QGridLayout(actionTab)
         actionGroupBoxLayout.addLayout(actionNavLayout, 0, 0, 1, 1)
@@ -384,9 +386,13 @@ class Editor(QtCore.QObject):
         actionGroupBoxLayout.addWidget(requirementGroupBox, 2, 0, 1, 5)
         actionGroupBoxLayout.addWidget(rewardGroupBox, 3, 0, 1, 5)
         actionTab.setLayout(actionGroupBoxLayout)
+        sceneTabWidget.addTab(actionTab, "Actions")
 
-        sceneTab.addTab(actionTab, "Actions")
-        self.centralTabWidget.addTab(sceneTab, "Scene")
+        sceneTabCentralLayout = QtWidgets.QVBoxLayout()
+        sceneTabCentralLayout.addLayout(sceneNavLayout)
+        sceneTabCentralLayout.addWidget(sceneTabWidget)
+        sceneTabCentralWidget.setLayout(sceneTabCentralLayout)
+        self.centralTabWidget.addTab(sceneTabCentralWidget, "Scenes")
 
         itemTabLayout = QtWidgets.QGridLayout(itemTab)
         itemTabLayout.addWidget(self.itemView, 0, 0, 1, 1)
@@ -425,8 +431,7 @@ class Editor(QtCore.QObject):
             partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
         self.rewardItemQtyInput.editingFinished.connect(
             partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
-        self.sceneIndexInput.editingFinished.connect(partial(self.setIndex, "scene", self.sceneIndexInput))
-        self.actionIndexInput.editingFinished.connect(partial(self.setIndex, "action", self.actionIndexInput))
+        self.sceneIndexInput.editingFinished.connect(partial(self.setSceneIndex, self.sceneIndexInput))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
         self.previousRequirementItemButton.clicked.connect(partial(self.previous, "requirement item"))
         self.previousRewardItemButton.clicked.connect(partial(self.previous, "reward item"))
@@ -461,7 +466,6 @@ class Editor(QtCore.QObject):
     def delete(self, context: str):
         deleteIndex = None
         data: list = None
-        callback = None
         if context == "scene":
             deleteIndex = self.sceneIndex
             data = self.scenes
@@ -671,12 +675,12 @@ class Editor(QtCore.QObject):
             removeOnSelect = False
             if actionAvailable:
                 action = scene.actions[self.actionIndex]
-                actionIndexText = str(self.actionIndex)
+                actionIndexText = "Action {}".format(str(self.actionIndex))
                 actionDescriptionText = action.description
                 actionIdInputText = str(action.id)
                 disableOnSelect = action.disableOnSelect
                 removeOnSelect = action.removeOnSelect
-            self.actionIndexInput.setText(actionIndexText)
+            self.actionIndexLabel.setText(actionIndexText)
             self.actionDescriptionInput.setText(actionDescriptionText)
             self.actionIdInput.setText(actionIdInputText)
             self.disableOnSelectCheck.setChecked(disableOnSelect)
@@ -745,7 +749,6 @@ class Editor(QtCore.QObject):
 
             self.newActionButton.setEnabled(sceneAvailable)
             self.previousActionButton.setEnabled(actionAvailable)
-            self.actionIndexInput.setEnabled(actionAvailable)
             self.nextActionButton.setEnabled(actionAvailable)
             self.deleteActionButton.setEnabled(actionAvailable)
             self.actionDescriptionInput.setEnabled(actionAvailable)
@@ -821,18 +824,14 @@ class Editor(QtCore.QObject):
             value = widget.text()
         target.__setattr__(attribute, value)
 
-    def setIndex(self, context: str, widget: QtWidgets.QLineEdit):
+    def setSceneIndex(self, widget: QtWidgets.QLineEdit):
         try:
             value = int(widget.text()) - 1
         except ValueError:
             value = 0
         value = max(value, 0)
-        if context.__contains__("action"):
-            value = min(value, len(self.scenes[self.sceneIndex].actions) - 1)
-            self.actionIndex = value
-        else:
-            value = min(value, len(self.scenes) - 1)
-            self.sceneIndex = value
+        value = min(value, len(self.scenes) - 1)
+        self.sceneIndex = value
         widget.setText(str(value))
         self.refresh()
 
