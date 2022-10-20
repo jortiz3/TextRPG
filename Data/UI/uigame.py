@@ -231,15 +231,16 @@ class UiGame(UI):
             if scene:
                 action = scene.getAction(index)
                 if action:
-                    if not action.removed:
+                    requirementMet = action.requirementMet(self._player)
+                    if not action.removed or (action.secret and not requirementMet):
                         icon = QtGui.QIcon()
                         if action.selected:
                             icon = self._checkIcon
-                        elif not action.requirementMet(self._player):
+                        elif not requirementMet:
                             icon = self._xIcon
                         action_button.setIcon(icon)
                         action_button.setEnabled(action.enabled)
-                        action_button.setText(self._translate(self._window_name, action.description))
+                        action_button.setText(self._translate(self._window_name, action.description()))
                         action_button.show()
                         continue
             action_button.hide()

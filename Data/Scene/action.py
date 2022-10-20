@@ -4,8 +4,10 @@ from Data.Character.player import Player
 
 
 class Action:
-    def __init__(self, description: str = "New Action", disable_on_select=False, id: int = -777, remove_on_select=False,
-                 requirement: Requirement = Requirement(), reward: Reward = Reward()):
+    def __init__(self, description: str = "", consequence: str = "", disable_on_select=False, id: int = -777,
+                 remove_on_select=False, requirement: Requirement = Requirement(), reward: Reward = Reward(),
+                 secret=False):
+        self._consequence: str = consequence
         self._description: str = description
         self.enabled: bool = True
         self._disableOnSelect: bool = disable_on_select
@@ -14,6 +16,7 @@ class Action:
         self._removeOnSelect: bool = remove_on_select
         self._requirement: Requirement = requirement
         self._reward: Reward = reward
+        self._secret: bool = secret
         self.selected: bool = False
 
     def __eq__(self, other):
@@ -22,13 +25,19 @@ class Action:
         otherAction: Action = other
         return self.id == otherAction.id and self._description == otherAction._description
 
+    def getDescription(self):
+        """Includes the requirement description."""
+        if self.id == -1:
+            return self._description
+        description = self._description
+        reqDescription = self.requirement.description()
+        if reqDescription:
+            description = "{} {}".format(description, reqDescription)
+        return description
+
     def getState(self):
         """Override to be used conditionally for json pickling."""
-        return {
-            "enabled": self.enabled,
-            "removed": self.removed,
-            "selected": self.selected
-        }
+        return {"enabled": self.enabled, "removed": self.removed, "selected": self.selected}
 
     def requirementMet(self, player: Player):
         """
@@ -61,6 +70,10 @@ class Action:
         return self.id >= -1
 
     @property
+    def consequence(self):
+        return self._consequence
+
+    @property
     def description(self):
         return self._description
 
@@ -72,25 +85,13 @@ class Action:
     def disableOnSelect(self):
         return self._disableOnSelect
 
-    @disableOnSelect.setter
-    def disableOnSelect(self, value: bool):
-        self._disableOnSelect = value
-
     @property
     def id(self):
         return int(self._id)
 
-    @id.setter
-    def id(self, value: int):
-        self._id = value
-
     @property
     def removeOnSelect(self):
         return self._removeOnSelect
-
-    @removeOnSelect.setter
-    def removeOnSelect(self, value: bool):
-        self._removeOnSelect = value
 
     @property
     def requirement(self):
@@ -99,3 +100,7 @@ class Action:
     @property
     def reward(self):
         return self._reward
+
+    @property
+    def secret(self):
+        return self._secret

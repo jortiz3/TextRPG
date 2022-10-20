@@ -17,6 +17,19 @@ class Requirement:
             for item_reference in self.items:
                 character.use(quantity=item_reference.quantity, item_reference=item_reference)
 
+    def description(self):
+        description = ""
+        partFormat = "{}: {},"
+        for ability in self.abilities:
+            description += partFormat.format(ability.name, ability.score)
+        description = description[:-1]
+        for itemRef in self.items:
+            description += partFormat.format(itemRef.item().name, itemRef.quantity)
+        description = description[:-1]
+        if len(description) < 1:
+            return None
+        return "[{}]".format(description)
+
     def met(self, character: Character):
         """
         Determines whether the character meets all the requirements.

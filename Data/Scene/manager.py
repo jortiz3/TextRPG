@@ -12,14 +12,17 @@ class SceneManager:
         self.__player = player
         self.currentSceneIndex = 0
         self.previousSceneIndexes: list[int] = []
+        self.currentConsequence = ""
 
     def copyAttributes(self, other):
         if not isinstance(other, SceneManager):
             self.currentSceneIndex = 0
             self.previousSceneIndexes = 0
+            self.currentConsequence = ""
             return
         self.currentSceneIndex = other.currentSceneIndex
         self.previousSceneIndexes = other.previousSceneIndexes
+        self.currentConsequence = other.currentConsequence
         if len(self.scenes) != len(other.scenes):
             return
         for index, scene in enumerate(self.scenes):
@@ -32,9 +35,12 @@ class SceneManager:
         return self.scenes[self.currentSceneIndex]
 
     def __getstate__(self):
-        state = self.__dict__.copy()
-        del state['_SceneManager__player']
-        return state
+        return {
+            "scenes": self.scenes,
+            "currentConsequence": self.currentConsequence,
+            "currentSceneIndex": self.currentSceneIndex,
+            "previousSceneIndexes": self.previousSceneIndexes
+        }
 
     def goto(self, index: int):
         """
@@ -50,9 +56,6 @@ class SceneManager:
         elif index < len(self.scenes):
             self.previousSceneIndexes.append(self.currentSceneIndex)
             self.currentSceneIndex = index
-
-        if self.previous():
-            self.current().setReturnAction("Return to {}".format(self.previous().name))
         return None
 
     def _loadScenes(self):
@@ -78,7 +81,9 @@ class SceneManager:
         Retrieves the description text for the current scene.
         :return:  The scene description.
         """
-        description = "{}\n\n".format(self.previous().exitDescription) if self.previous() else ""
+        description = ""
+        if len(self.currentConsequence) > 0:
+            description += "{}\n\n".format(self.currentConsequence)
         description += self.current().enterDescription if self.current() else ""
         return description
 
@@ -93,5 +98,6 @@ class SceneManager:
         if self.current():
             action = self.current().getAction(index)
             if action.requirementMet(self.__player) and action.select(self.__player):
+                self.currentConsequence = action.consequence
                 return self.goto(action.id)
         return None
