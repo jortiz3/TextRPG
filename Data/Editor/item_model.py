@@ -39,7 +39,7 @@ class ItemModel(QAbstractTableModel):
             if orientation == Qt.Orientation.Horizontal:
                 return self._headers[section]
             else:
-                return section + 1
+                return section
 
     def insertRow(self, row: int, parent: QModelIndex = ...) -> bool:
         if row < 0:

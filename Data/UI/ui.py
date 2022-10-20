@@ -24,6 +24,7 @@ class UI(ABC):
                  window_min_size=QtCore.QSize(700, 500), window_name="MainWindow",
                  window_show_size: QtCore.QSize = None, window_title="Text RPG - Game"):
         self._checkIcon = QtGui.QIcon("Data/Images/UI/check.png")
+        self._gameIcon = QtGui.QIcon("Data/Images/UI/game.png")
         self._gearIcon = QtGui.QIcon("Data/Images/UI/gear.png")
         self._xIcon = QtGui.QIcon("Data/Images/UI/x.png")
 
@@ -33,6 +34,7 @@ class UI(ABC):
         self._window_name = window_name
         self._window_title = window_title
         self._window_show_size: QtCore.QSize = window_show_size
+        self._window.setWindowIcon(self._gameIcon)
 
         self._window.setStyleSheet(self._defaultStyleSheet)
         self._window.setObjectName(self._window_name)
