@@ -68,18 +68,17 @@ class Editor(QtCore.QObject):
         sceneNameLabel = QtWidgets.QLabel(infoTab)
         sceneNameLabel.setText("Name:")
         sceneNameLabel.setToolTip("Name of the scene.")
+        sceneNameLabel.setAlignment(QtCore.Qt.AlignRight)
         self.sceneNameInput = QtWidgets.QLineEdit(infoTab)
-        enterDescriptionLabel = QtWidgets.QLabel(infoTab)
-        enterDescriptionLabel.setText("Enter:")
-        enterDescriptionLabel.setToolTip("Text displayed when entering the scene.")
-        self.enterDescriptionInput = QtWidgets.QTextEdit(infoTab)
-        exitDescriptionLabel = QtWidgets.QLabel(infoTab)
-        exitDescriptionLabel.setText("Exit:")
-        exitDescriptionLabel.setToolTip("Text displayed when exiting the scene.")
-        self.exitDescriptionInput = QtWidgets.QTextEdit(infoTab)
+        sceneDescriptionLabel = QtWidgets.QLabel(infoTab)
+        sceneDescriptionLabel.setText("Description:")
+        sceneDescriptionLabel.setToolTip("Text displayed when entering the scene.")
+        sceneDescriptionLabel.setAlignment(QtCore.Qt.AlignRight)
+        self.sceneDescriptionInput = QtWidgets.QTextEdit(infoTab)
         imagePathLabel = QtWidgets.QLabel(infoTab)
         imagePathLabel.setText("Image:")
         imagePathLabel.setToolTip("The image to display for this scene.")
+        imagePathLabel.setAlignment(QtCore.Qt.AlignRight)
         self.imagePathInput = QtWidgets.QLineEdit(infoTab)
         self.imagePathButton = QtWidgets.QPushButton(infoTab)
         self.imagePathButton.setIcon(self.folderIcon)
@@ -115,6 +114,13 @@ class Editor(QtCore.QObject):
         actionDescriptionLabel.setText("Description:")
         actionDescriptionLabel.setAlignment(QtCore.Qt.AlignRight)
         self.actionDescriptionInput = QtWidgets.QLineEdit(actionTab)
+        consequenceTooltip = "Description of what happens after selecting this action."
+        actionConsequenceLabel = QtWidgets.QLabel(actionTab)
+        actionConsequenceLabel.setText("Consequence:")
+        actionConsequenceLabel.setToolTip(consequenceTooltip)
+        actionConsequenceLabel.setAlignment(QtCore.Qt.AlignRight)
+        self.actionConsequenceInput = QtWidgets.QLineEdit(actionTab)
+        self.actionConsequenceInput.setToolTip(consequenceTooltip)
         actionIdTooltip = "< -1: scene index unaffected\n-1: go to previous scene\n>= 0: go to scene index"
         actionIdLabel = QtWidgets.QLabel(actionTab)
         actionIdLabel.setText("Id:")
@@ -133,6 +139,14 @@ class Editor(QtCore.QObject):
         removeOnSelectLabel.setAlignment(QtCore.Qt.AlignRight)
         self.removeOnSelectCheck = QtWidgets.QCheckBox(actionTab)
         self.removeOnSelectCheck.setFixedWidth(indexLabelWidth)
+        actionSecretTooltip = "Secret actions are hidden until requirements are met."
+        actionSecretLabel = QtWidgets.QLabel(actionTab)
+        actionSecretLabel.setText("Secret:")
+        actionSecretLabel.setToolTip(actionSecretTooltip)
+        actionSecretLabel.setAlignment(QtCore.Qt.AlignRight)
+        self.actionSecretCheck = QtWidgets.QCheckBox(actionTab)
+        self.actionSecretCheck.setFixedWidth(indexLabelWidth)
+        self.actionSecretCheck.setToolTip(actionSecretTooltip)
         self.actionIndexLabel = QtWidgets.QLabel(actionTab)
         self.actionIndexLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.actionIndexLabel.setFixedWidth(indexLabelWidth)
@@ -311,10 +325,8 @@ class Editor(QtCore.QObject):
         infoTabLayout.addWidget(imagePathLabel, 2, 0, 1, 1)
         infoTabLayout.addWidget(self.imagePathInput, 2, 1, 1, 1)
         infoTabLayout.addWidget(self.imagePathButton, 2, 2, 1, 1)
-        infoTabLayout.addWidget(enterDescriptionLabel, 3, 0, 1, 1)
-        infoTabLayout.addWidget(self.enterDescriptionInput, 3, 1, 1, 2)
-        infoTabLayout.addWidget(exitDescriptionLabel, 4, 0, 1, 1)
-        infoTabLayout.addWidget(self.exitDescriptionInput, 4, 1, 1, 2)
+        infoTabLayout.addWidget(sceneDescriptionLabel, 3, 0, 1, 1)
+        infoTabLayout.addWidget(self.sceneDescriptionInput, 3, 1, 1, 2)
         infoTab.setLayout(infoTabLayout)
         sceneTabWidget.addTab(infoTab, "Info")
 
@@ -379,12 +391,16 @@ class Editor(QtCore.QObject):
         actionGroupBoxLayout.addWidget(self.actionDescriptionInput, 0, 2, 1, 1)
         actionGroupBoxLayout.addWidget(actionIdLabel, 0, 3, 1, 1)
         actionGroupBoxLayout.addWidget(self.actionIdInput, 0, 4, 1, 1)
-        actionGroupBoxLayout.addWidget(disableOnSelectLabel, 1, 1, 1, 1)
-        actionGroupBoxLayout.addWidget(self.disableOnSelectCheck, 1, 2, 1, 1)
-        actionGroupBoxLayout.addWidget(removeOnSelectLabel, 1, 3, 1, 1)
-        actionGroupBoxLayout.addWidget(self.removeOnSelectCheck, 1, 4, 1, 1)
-        actionGroupBoxLayout.addWidget(requirementGroupBox, 2, 0, 1, 5)
-        actionGroupBoxLayout.addWidget(rewardGroupBox, 3, 0, 1, 5)
+        actionGroupBoxLayout.addWidget(actionConsequenceLabel, 1, 1, 1, 1)
+        actionGroupBoxLayout.addWidget(self.actionConsequenceInput, 1, 2, 1, 1)
+        actionGroupBoxLayout.addWidget(actionSecretLabel, 1, 3, 1, 1)
+        actionGroupBoxLayout.addWidget(self.actionSecretCheck, 1, 4, 1, 1)
+        actionGroupBoxLayout.addWidget(disableOnSelectLabel, 2, 1, 1, 1)
+        actionGroupBoxLayout.addWidget(self.disableOnSelectCheck, 2, 2, 1, 1)
+        actionGroupBoxLayout.addWidget(removeOnSelectLabel, 2, 3, 1, 1)
+        actionGroupBoxLayout.addWidget(self.removeOnSelectCheck, 2, 4, 1, 1)
+        actionGroupBoxLayout.addWidget(requirementGroupBox, 3, 0, 1, 5)
+        actionGroupBoxLayout.addWidget(rewardGroupBox, 4, 0, 1, 5)
         actionTab.setLayout(actionGroupBoxLayout)
         sceneTabWidget.addTab(actionTab, "Actions")
 
@@ -408,13 +424,15 @@ class Editor(QtCore.QObject):
         self.sceneNameInput.editingFinished.connect(partial(self.set, "scene.name", self.sceneNameInput))
         self.imagePathInput.editingFinished.connect(partial(self.set, "scene.imagePath", self.imagePathInput))
         self.imagePathButton.clicked.connect(self.pickImageFile)
-        self.enterDescriptionInput.textChanged.connect(
-            partial(self.set, "scene.enterDescription", self.enterDescriptionInput))
-        self.exitDescriptionInput.textChanged.connect(
-            partial(self.set, "scene.exitDescription", self.exitDescriptionInput))
+        self.sceneDescriptionInput.textChanged.connect(
+            partial(self.set, "scene.description", self.sceneDescriptionInput))
         self.actionIdInput.editingFinished.connect(partial(self.set, "action._id", self.actionIdInput))
         self.actionDescriptionInput.editingFinished.connect(
             partial(self.set, "action.description", self.actionDescriptionInput))
+        self.actionConsequenceInput.editingFinished.connect(
+            partial(self.set, "action.consequence", self.actionConsequenceInput))
+        self.actionSecretCheck.clicked.connect(
+            partial(self.set, "action.secret", self.actionSecretCheck))
         self.disableOnSelectCheck.clicked.connect(
             partial(self.set, "action.disableOnSelect", self.disableOnSelectCheck))
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
@@ -651,38 +669,41 @@ class Editor(QtCore.QObject):
             sceneIndexText = "-"
             sceneNameText = "-"
             imagePathText = "-"
-            enterText = "-"
-            exitText = "-"
+            sceneDescription = "-"
             if sceneAvailable:
                 scene = self.scenes[self.sceneIndex]
                 sceneIndexText = str(self.sceneIndex)
                 sceneNameText = scene.name
                 imagePathText = scene.imagePath
-                enterText = scene.enterDescription
-                exitText = scene.exitDescription
+                sceneDescription = scene.description
             self.sceneIndexInput.setText(sceneIndexText)
             self.sceneNameInput.setText(sceneNameText)
             self.imagePathInput.setText(imagePathText)
-            self.enterDescriptionInput.setText(enterText)
-            self.exitDescriptionInput.setText(exitText)
+            self.sceneDescriptionInput.setText(sceneDescription)
 
             action: Action = None
             actionAvailable = bool(sceneAvailable and self.actionIndex < len(scene.actions))
             actionIndexText = "-"
             actionDescriptionText = "-"
+            actionConsequenceText = "-"
             actionIdInputText = "-"
+            secret = False
             disableOnSelect = False
             removeOnSelect = False
             if actionAvailable:
                 action = scene.actions[self.actionIndex]
                 actionIndexText = "Action {}".format(str(self.actionIndex))
                 actionDescriptionText = action.description
+                actionConsequenceText = action.consequence
                 actionIdInputText = str(action.id)
+                secret = action.secret
                 disableOnSelect = action.disableOnSelect
                 removeOnSelect = action.removeOnSelect
             self.actionIndexLabel.setText(actionIndexText)
             self.actionDescriptionInput.setText(actionDescriptionText)
+            self.actionConsequenceInput.setText(actionConsequenceText)
             self.actionIdInput.setText(actionIdInputText)
+            self.actionSecretCheck.setChecked(secret)
             self.disableOnSelectCheck.setChecked(disableOnSelect)
             self.removeOnSelectCheck.setChecked(removeOnSelect)
 
@@ -744,15 +765,16 @@ class Editor(QtCore.QObject):
             self.sceneNameInput.setEnabled(sceneAvailable)
             self.imagePathInput.setEnabled(sceneAvailable)
             self.imagePathButton.setEnabled(sceneAvailable)
-            self.enterDescriptionInput.setEnabled(sceneAvailable)
-            self.exitDescriptionInput.setEnabled(sceneAvailable)
+            self.sceneDescriptionInput.setEnabled(sceneAvailable)
 
             self.newActionButton.setEnabled(sceneAvailable)
             self.previousActionButton.setEnabled(actionAvailable)
             self.nextActionButton.setEnabled(actionAvailable)
             self.deleteActionButton.setEnabled(actionAvailable)
             self.actionDescriptionInput.setEnabled(actionAvailable)
+            self.actionConsequenceInput.setEnabled(actionAvailable)
             self.actionIdInput.setEnabled(actionAvailable)
+            self.actionSecretCheck.setEnabled(actionAvailable)
             self.disableOnSelectCheck.setEnabled(actionAvailable)
             self.removeOnSelectCheck.setEnabled(actionAvailable)
 
