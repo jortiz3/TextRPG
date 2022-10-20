@@ -578,8 +578,9 @@ class Editor(QtCore.QObject):
         messageBox.exec()
 
     def pickImageFile(self):
-        dialogOutput = QtWidgets.QFileDialog.getOpenFileName(self.window, "Select Image", "Data/Images/Scene",
-                                                             "Image Files (*.png)")
+        imagePath = "Data/Images/Scene"
+        imageFilter = "Image File (*.png)"
+        dialogOutput = QtWidgets.QFileDialog.getOpenFileName(self.window, "Select Image", imagePath, imageFilter)
         if dialogOutput:
             path = dialogOutput[0]
             dataIndex = path.find("Data")
@@ -587,6 +588,14 @@ class Editor(QtCore.QObject):
                 path = path[dataIndex:]
                 self.imagePathInput.setText(path)
                 self.imagePathInput.editingFinished.emit()
+                return
+        title = "Error: Invalid Image Selection"
+        message = "The '{}' must be within the game directory '{}'.".format(imageFilter, imagePath)
+        icon = QtWidgets.QMessageBox.Warning
+        buttons = QtWidgets.QMessageBox.Ok
+        messageBox = QtWidgets.QMessageBox(icon, title, message, buttons, self.window)
+        messageBox.accepted.connect(messageBox.close)
+        messageBox.exec()
 
     def previous(self, context: str):
         if context == "scene" and self.sceneIndex > 0:
