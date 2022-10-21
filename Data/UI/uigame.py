@@ -62,8 +62,6 @@ class UiGame(UI):
         self._powerLabel = QtWidgets.QLabel(characterTab)
         self._craftBonusLabel = QtWidgets.QLabel(characterTab)
         self._enchantBonusLabel = QtWidgets.QLabel(characterTab)
-        self._dodgeLabel = QtWidgets.QLabel(characterTab)
-        self._runLabel = QtWidgets.QLabel(characterTab)
         self._abilityPointsLabel = QtWidgets.QLabel(characterTab)
         characterTabLayout = QtWidgets.QGridLayout(self._playerInfoTabs)
         characterTabLayout.addWidget(self._levelLabel, 0, 0, 1, 1)
@@ -101,8 +99,6 @@ class UiGame(UI):
 
         characterTabLayout.addWidget(self._craftBonusLabel, 9, 0, 1, 1)
         characterTabLayout.addWidget(self._enchantBonusLabel, 9, 1, 1, 1)
-        characterTabLayout.addWidget(self._dodgeLabel, 10, 0, 1, 1)
-        characterTabLayout.addWidget(self._runLabel, 10, 1, 1, 1)
         characterTab.setLayout(characterTabLayout)
 
         self._inventoryTable = QtWidgets.QTableView(self._playerInfoTabs)
@@ -134,6 +130,8 @@ class UiGame(UI):
         self._menuPosition.setObjectName("menuPosition")
         self._menuResize = QtWidgets.QMenu(self._menuWindow)
         self._menuResize.setObjectName("menuResize")
+        self._menuHelp = QtWidgets.QAction(self._menubar)
+        self._menuHelp.setObjectName("menuHelp")
         self._window.setMenuBar(self._menubar)
         self._action_topLeft = QtWidgets.QAction(self._window)
         self._action_topLeft.setShortcutVisibleInContextMenu(False)
@@ -173,6 +171,7 @@ class UiGame(UI):
         self._menuWindow.addAction(self._menuPosition.menuAction())
         self._menubar.addAction(self._menuFile.menuAction())
         self._menubar.addAction(self._menuWindow.menuAction())
+        self._menubar.addAction(self._menuHelp)
 
         self._getScene = None
         self._getSceneDescription = None
@@ -186,7 +185,7 @@ class UiGame(UI):
         QtCore.QMetaObject.connectSlotsByName(self._window)
 
     def connect(self, get_scene=None, get_scene_description=None, player=None, save_game=None, select_action=None,
-                show_load=None, show_main=None):
+                show_help=None, show_load=None, show_main=None):
         if get_scene:
             self._getScene = get_scene
         if get_scene_description:
@@ -205,6 +204,8 @@ class UiGame(UI):
                 scene_action_button = self._sceneActionButtons[index]
                 scene_action_button.clicked.connect(partial(select_action, index))
                 scene_action_button.clicked.connect(self.refresh)
+        if show_help:
+            self._menuHelp.triggered.connect(show_help)
         if show_load:
             self._actionLoad.triggered.connect(show_load)
         if show_main:
@@ -225,7 +226,7 @@ class UiGame(UI):
         if self._getSceneDescription:
             scene_description = self._getSceneDescription()
         self._sceneDescriptionLabel.setText(self._translate(self._window_name, scene_description))
-        self._sceneActionsGroupBox.setTitle(self._translate(self._window_name, "Scene Actions"))
+        self._sceneActionsGroupBox.setTitle(self._translate(self._window_name, "Actions"))
 
         for index, action_button in enumerate(self._sceneActionButtons):
             if scene:
@@ -256,13 +257,9 @@ class UiGame(UI):
         powerText = "POWER: {}"
         craftBonusText = "CRAFT: {}"
         enchantBonusText = "ENCH: {}"
-        dodgeText = "DODGE: {}"
-        runText = "RUN: {}"
         if self._player:
             levelText = levelText.format(self._player.level)
             expText = expText.format(self._player.experience, self._player.requiredExperience())
-            dodgeText = dodgeText.format(self._player.dodgeBonus())
-            runText = runText.format(self._player.runBonus())
             powerText = powerText.format(self._player.powerLevel())
             craftBonusText = craftBonusText.format(self._player.craftingBonus())
             enchantBonusText = enchantBonusText.format(self._player.enchantingBonus())
@@ -271,32 +268,35 @@ class UiGame(UI):
         self._powerLabel.setText(self._translate(self._window_name, powerText))
         self._craftBonusLabel.setText(self._translate(self._window_name, craftBonusText))
         self._enchantBonusLabel.setText(self._translate(self._window_name, enchantBonusText))
-        self._dodgeLabel.setText(self._translate(self._window_name, dodgeText))
-        self._runLabel.setText(self._translate(self._window_name, runText))
 
         ap = -1
         if self._player:
             ap = self._player.ability_points
         self._abilityPointsLabel.setText(self._translate(self._window_name, "AP: {}".format(ap)))
+        self._abilityPointsLabel.setToolTip(self._translate(self._window_name, "Ability Points"))
         labelText = "{}:"
         scoreText = "{}"
         incrementText = "+"
+        incrementTooltip = "Increase {}"
         for abilityName in self._abilityNames:
+            abilityAbbreviation = abilityName[0:3].upper()
             abilityDescription = ""
             abilityScore = -1
             if self._player:
                 abilityDescription = self._player.ability(abilityName, "description")
                 abilityScore = self._player.ability(abilityName)
             abilityLabel = self._abilityWidgets[self._labelFormat.format(abilityName)]
-            abilityLabel.setText(self._translate(self._window_name, labelText.format(abilityName[0:3].upper())))
+            abilityLabel.setText(self._translate(self._window_name, labelText.format(abilityAbbreviation)))
             abilityLabel.setToolTip(self._translate(self._window_name, abilityDescription))
             abilityScoreLabel = self._abilityWidgets[self._scoreFormat.format(abilityName)]
             abilityScoreLabel.setText(self._translate(self._window_name, scoreText.format(abilityScore)))
+            abilityScoreLabel.setToolTip(self._translate(self._window_name, abilityDescription))
             if abilityScore >= self._player.maxAbilityScore():
                 abilityScoreLabel.setStyleSheet(self._greenStyleSheet)
             incrementButton = self._abilityWidgets[self._incrementFormat.format(abilityName)]
             incrementButton.setText(self._translate(self._window_name, incrementText))
             incrementButton.setEnabled(ap > 0)
+            incrementButton.setToolTip(self._translate(self._window_name, incrementTooltip.format(abilityAbbreviation)))
 
         self._inventoryTable.update()
 
@@ -304,6 +304,7 @@ class UiGame(UI):
         self._menuWindow.setTitle(self._translate(self._window_name, "Window"))
         self._menuPosition.setTitle(self._translate(self._window_name, "Position"))
         self._menuResize.setTitle(self._translate(self._window_name, "Resize"))
+        self._menuHelp.setText(self._translate(self._window_name, "Help"))
 
         self._action_topLeft.setText(self._translate(self._window_name, "Top-Left Corner"))
         self._action_topLeft.setToolTip(self._translate(self._window_name, "Set the window position"))

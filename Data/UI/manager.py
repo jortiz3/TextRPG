@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMainWindow
 
 from Data.UI.ui import UI
 from Data.UI.uigame import UiGame
+from Data.UI.uihelp import UiHelp
 from Data.UI.uiload import UiLoad
 from Data.UI.uimain import UiMain
 from Data.UI.uinewgame import UiNewGame
@@ -14,14 +15,17 @@ class UiManager:
 
     def __init__(self):
         self._game = UiGame(QMainWindow())
+        self._help = UiHelp(QMainWindow())
         self._load = UiLoad(QMainWindow())
         self._main = UiMain(QMainWindow())
         self._new = UiNewGame(QMainWindow())
 
-        self._all: dict[str, UI] = {"game": self._game, "load": self._load, "main": self._main, "new": self._new}
+        self._all: dict[str, UI] = {"game": self._game, "help": self._help, "load": self._load, "main": self._main,
+                                    "new": self._new}
         self._focus: UI = None
 
-        self._game.connect(show_load=partial(self.show, "load"), show_main=partial(self.show, "main"))
+        self._game.connect(show_help=partial(self.show, "help"), show_load=partial(self.show, "load"),
+                           show_main=partial(self.show, "main"))
         self._main.connect(goto_load=partial(self.show, "load"))
         self._new.connect(show_main=partial(self.show, "main"))
 
