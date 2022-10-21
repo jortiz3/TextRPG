@@ -27,7 +27,7 @@ class Requirement:
         if description.endswith(", "):
             description = description[:-2]
         if len(description) < 1:
-            return None
+            return ""
         return "[{}]".format(description)
 
     def met(self, character: Character):

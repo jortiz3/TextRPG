@@ -14,7 +14,7 @@ class UI(ABC):
     _largeIconSize = QtCore.QSize(256, 256)
     _smallButtonSize = QtCore.QSize(50, 25)
     _smallIconSize = QtCore.QSize(64, 64)
-    _tinyButtonSize = QtCore.QSize(25, 25)
+    _tinyButtonSize = QtCore.QSize(32, 32)
 
     _boldStyleSheet = "font: bold; font-size: 14pt;"
     _defaultStyleSheet = "font-size: 14pt;"
@@ -28,11 +28,12 @@ class UI(ABC):
         self._itemIcon = QtGui.QIcon("Data/Images/UI/key.png")
         self._requirementIcon = QtGui.QIcon("Data/Images/UI/checklist.png")
 
-        self._dexterityIcon = QtGui.QIcon("Data/Images/UI/dexterity.png")
-        self._intelligenceIcon = QtGui.QIcon("Data/Images/UI/intelligence.png")
-        self._strengthIcon = QtGui.QIcon("Data/Images/UI/strength.png")
-        self._willIcon = QtGui.QIcon("Data/Images/UI/will.png")
-        self._wisdomIcon = QtGui.QIcon("Data/Images/UI/wisdom.png")
+        self._abilityIcons: dict[str, QtGui.QIcon] = {"dexterity": QtGui.QIcon("Data/Images/UI/dexterity.png"),
+                                                      "intelligence": QtGui.QIcon("Data/Images/UI/intelligence.png"),
+                                                      "points": QtGui.QIcon("Data/Images/UI/ability points.png"),
+                                                      "strength": QtGui.QIcon("Data/Images/UI/strength.png"),
+                                                      "will": QtGui.QIcon("Data/Images/UI/will.png"),
+                                                      "wisdom": QtGui.QIcon("Data/Images/UI/wisdom.png")}
 
         self._window: QtWidgets.QMainWindow = window
         self._window.setMaximumSize(window_max_size)

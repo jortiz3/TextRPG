@@ -24,73 +24,73 @@ class UiNewGame(UI):
         self._nameLabel.setObjectName("nameLabel")
         self._nameInput = QtWidgets.QLineEdit(self._centralWidget)
         self._nameInput.setValidator(QtGui.QRegularExpressionValidator(QtCore.QRegularExpression('^[A-Za-z0-9]+$')))
-        self._nameInput.setObjectName("nameInput")
+        self._abilityPointsIcon = QtWidgets.QLabel(self._centralWidget)
+        self._abilityPointsIcon.setPixmap(self._abilityIcons["points"].pixmap(self._smallIconSize))
+        self._abilityPointsIcon.setAlignment(QtCore.Qt.AlignCenter)
         self._abilityPointsLabel = QtWidgets.QLabel(self._centralWidget)
         self._abilityPointsLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self._abilityPointsLabel.setMaximumWidth(self._largeButtonSize.width())
-        self._abilityPointsLabel.setObjectName("abilityPointsLabel")
+        self._abilityPointsLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self._abilityPointsRemainingLabel = QtWidgets.QLabel(self._centralWidget)
-        self._abilityPointsRemainingLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self._abilityPointsRemainingLabel.setMaximumWidth(self._largeButtonSize.width())
-        self._abilityPointsRemainingLabel.setObjectName("abilityPointsRemainingLabel")
+        self._abilityPointsRemainingLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self._abilityPointsRemainingLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 
         self._centralWidgetLayout = QtWidgets.QGridLayout(self._centralWidget)
-        self._centralWidgetLayout.setObjectName("centralWidgetLayout")
+        self._centralWidgetLayout.addWidget(self._introductionLabel, 0, 0, 2, 5)
+        self._centralWidgetLayout.addWidget(self._nameLabel, 2, 1, 1, 1)
+        self._centralWidgetLayout.addWidget(self._nameInput, 2, 2, 1, 2)
+        self._centralWidgetLayout.addWidget(self._abilityPointsIcon, 3, 1, 1, 1)
+        self._centralWidgetLayout.addWidget(self._abilityPointsLabel, 3, 2, 1, 1)
+        self._centralWidgetLayout.addWidget(self._abilityPointsRemainingLabel, 3, 3, 1, 1)
 
-        self._centralWidgetLayout.addWidget(self._introductionLabel, 0, 0, 2, 4)
-        self._centralWidgetLayout.addWidget(self._nameLabel, 2, 0, 1, 1)
-        self._centralWidgetLayout.addWidget(self._nameInput, 2, 1, 1, 2)
-        self._centralWidgetLayout.addWidget(self._abilityPointsLabel, 3, 1, 1, 1)
-        self._centralWidgetLayout.addWidget(self._abilityPointsRemainingLabel, 3, 2, 1, 1)
-
+        self._iconFormat = "{}Icon"
         self._labelFormat = "{}Label"
         self._layoutFormat = "{}Layout"
         self._decrementFormat = "{}DecrementButton"
         self._scoreFormat = "{}ScoreLabel"
         self._incrementFormat = "{}IncrementButton"
         self._abilityWidgets: dict[str, QtWidgets.QWidget] = {}
-        for abilityIndex in range(len(self._abilityNames)):
-            abilityName = self._abilityNames[abilityIndex]
+        for abilityIndex, abilityName in enumerate(self._abilityNames):
             row = abilityIndex + 4
+
+            abilityIcon = QtWidgets.QLabel(self._centralWidget)
+            abilityIcon.setAlignment(QtCore.Qt.AlignCenter)
+            abilityIcon.setPixmap(self._abilityIcons[abilityName.lower()].pixmap(self._smallIconSize))
+            iconKey = self._iconFormat.format(abilityName)
+            self._abilityWidgets[iconKey] = abilityIcon
 
             abilityLabel = QtWidgets.QLabel(self._centralWidget)
             abilityLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            abilityLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
             abilityLabelKey = self._labelFormat.format(abilityName)
-            abilityLabel.setObjectName(abilityLabelKey)
             self._abilityWidgets[abilityLabelKey] = abilityLabel
 
             decrementButton = QtWidgets.QPushButton(self._centralWidget)
             decrementButton.setFixedSize(self._tinyButtonSize)
             decrementButton.setStyleSheet(self._boldStyleSheet)
             decrementButtonKey = self._decrementFormat.format(abilityName)
-            decrementButton.setObjectName(decrementButtonKey)
             self._abilityWidgets[decrementButtonKey] = decrementButton
 
             scoreLabel = QtWidgets.QLabel(self._centralWidget)
             scoreLabel.setStyleSheet(self._boldStyleSheet)
             scoreLabel.setAlignment(QtCore.Qt.AlignCenter)
             scoreLabelKey = self._scoreFormat.format(abilityName)
-            scoreLabel.setObjectName(scoreLabelKey)
             self._abilityWidgets[scoreLabelKey] = scoreLabel
 
             incrementButton = QtWidgets.QPushButton(self._centralWidget)
             incrementButton.setFixedSize(self._tinyButtonSize)
             incrementButton.setStyleSheet(self._boldStyleSheet)
             incrementButtonKey = self._incrementFormat.format(abilityName)
-            incrementButton.setObjectName(incrementButtonKey)
             self._abilityWidgets[incrementButtonKey] = incrementButton
 
-            spacer = QtWidgets.QSpacerItem(self._defaultButtonSize.width(), self._defaultButtonSize.height(),
-                                           QtWidgets.QSizePolicy.Expanding)
-
             abilityModLayout = QtWidgets.QHBoxLayout(self._centralWidget)
+            abilityModLayout.setAlignment(QtCore.Qt.AlignCenter)
             abilityModLayout.addWidget(decrementButton)
             abilityModLayout.addWidget(scoreLabel)
             abilityModLayout.addWidget(incrementButton)
-            abilityModLayout.addSpacerItem(spacer)
 
-            self._centralWidgetLayout.addWidget(abilityLabel, row, 1, 1, 1)
-            self._centralWidgetLayout.addLayout(abilityModLayout, row, 2, 1, 2)
+            self._centralWidgetLayout.addWidget(abilityIcon, row, 1, 1, 1)
+            self._centralWidgetLayout.addWidget(abilityLabel, row, 2, 1, 1)
+            self._centralWidgetLayout.addLayout(abilityModLayout, row, 3, 1, 1)
 
         self._cancelButton = QtWidgets.QPushButton(self._centralWidget)
         self._cancelButton.setFixedSize(self._largeButtonSize)
@@ -100,7 +100,7 @@ class UiNewGame(UI):
         self._startGameButton.setObjectName("startGameButton")
 
         self._centralWidgetLayout.addWidget(self._cancelButton, 12, 1, 1, 1)
-        self._centralWidgetLayout.addWidget(self._startGameButton, 12, 2, 1, 1)
+        self._centralWidgetLayout.addWidget(self._startGameButton, 12, 3, 1, 1)
         self._centralWidget.setLayout(self._centralWidgetLayout)
         self._window.setCentralWidget(self._centralWidget)
 
@@ -137,6 +137,9 @@ class UiNewGame(UI):
         scoreText = "{}"
         incrementText = "+"
         for abilityName in self._abilityNames:
+            abilityIcon = self._abilityWidgets[self._iconFormat.format(abilityName)]
+            abilityIcon.setToolTip(self._translate(self._window_name, abilityName))
+
             abilityDescription = ""
             abilityScore = -1
             if self.player:
@@ -157,6 +160,7 @@ class UiNewGame(UI):
         ap = -1
         if self.player:
             ap = self.player.ability_points
+        self._abilityPointsIcon.setToolTip(self._translate(self._window_name, "Ability Points"))
         abilityPointsTooltip = self._translate(self._window_name, "Spend ability points now or later to increase your "
                                                                   "character's abilities.")
         self._abilityPointsLabel.setText(self._translate(self._window_name, "Ability Points (AP):"))
