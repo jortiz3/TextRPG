@@ -78,7 +78,7 @@
                 },
                 "_reward": {
                     "py/object": "Data.Scene.reward.Reward",
-                    "experience": "500",
+                    "experience": 500,
                     "items": [
                         {
                             "py/object": "Data.Item.item_reference.ItemRef",
@@ -112,7 +112,7 @@
                 },
                 "_reward": {
                     "py/object": "Data.Scene.reward.Reward",
-                    "experience": "1000",
+                    "experience": 1000,
                     "items": []
                 },
                 "_secret": true,

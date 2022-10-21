@@ -875,7 +875,7 @@ class Editor(QtCore.QObject):
         else:
             value = widget.text()
 
-        if context.endswith("id") or context.endswith("score"):
+        if context.endswith("id") or context.endswith("score") or context.endswith("experience"):
             value = int(value)
         target.__setattr__(attribute, value)
 

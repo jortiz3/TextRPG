@@ -19,13 +19,13 @@ class Requirement:
 
     def description(self):
         description = ""
-        partFormat = "{}: {},"
+        partFormat = "{}: {}, "
         for ability in self.abilities:
             description += partFormat.format(ability.name, ability.score)
-        description = description[:-1]
         for itemRef in self.items:
             description += partFormat.format(itemRef.item().name, itemRef.quantity)
-        description = description[:-1]
+        if description.endswith(", "):
+            description = description[:-2]
         if len(description) < 1:
             return None
         return "[{}]".format(description)
