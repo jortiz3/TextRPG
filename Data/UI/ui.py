@@ -24,9 +24,10 @@ class UI(ABC):
                  window_min_size=QtCore.QSize(700, 500), window_name="MainWindow",
                  window_show_size: QtCore.QSize = None, window_title="Text RPG - Game"):
         self._checkIcon = QtGui.QIcon("Data/Images/UI/check.png")
+        self._deleteIcon = QtGui.QIcon("Data/Images/UI/delete.png")
         self._gameIcon = QtGui.QIcon("Data/Images/UI/game.png")
         self._gearIcon = QtGui.QIcon("Data/Images/UI/gear.png")
-        self._xIcon = QtGui.QIcon("Data/Images/UI/x.png")
+        self._requirementIcon = QtGui.QIcon("Data/Images/UI/checklist.png")
 
         self._window: QtWidgets.QMainWindow = window
         self._window.setMaximumSize(window_max_size)

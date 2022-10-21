@@ -4,10 +4,11 @@
         "actions": [
             {
                 "py/object": "Data.Scene.action.Action",
+                "_consequence": "You approach the giant tree...",
                 "_description": "Approach the giant tree",
                 "enabled": true,
                 "_disableOnSelect": false,
-                "_id": "-777",
+                "_id": 1,
                 "removed": false,
                 "_removeOnSelect": false,
                 "_requirement": {
@@ -20,14 +21,16 @@
                     "experience": 10,
                     "items": []
                 },
+                "_secret": false,
                 "selected": false
             },
             {
                 "py/object": "Data.Scene.action.Action",
+                "_consequence": "You walk into the forest...",
                 "_description": "Take the trail into the forest",
                 "enabled": true,
                 "_disableOnSelect": false,
-                "_id": -777,
+                "_id": 2,
                 "removed": false,
                 "_removeOnSelect": false,
                 "_requirement": {
@@ -40,19 +43,21 @@
                     "experience": 10,
                     "items": []
                 },
+                "_secret": false,
                 "selected": false
             }
         ],
-        "_enterDescription": "You find yourself in a clearing with tall grass surrounded by trees where the sound of chirping can be heard and a gentle breeze can be felt. At the center of the clearing is a giant tree with a hole in its trunk. To your side, there is a trail leading into the forest.",
-        "_exitDescription": "You carry on...",
+        "_description": "You find yourself in a clearing with tall grass surrounded by trees where the sound of chirping can be heard and a gentle breeze can be felt. At the center of the clearing is a giant tree with a hole in its trunk. To your side, there is a trail leading into the forest.",
         "_imagePath": "Data/Images/Scene/forest.png",
-        "_name": "Forest of Awakening"
+        "_name": "Forest of Awakening, Clearing",
+        "enterDescription": "You find yourself in a clearing with tall grass surrounded by trees where the sound of chirping can be heard and a gentle breeze can be felt. At the center of the clearing is a giant tree with a hole in its trunk. To your side, there is a trail leading into the forest."
     },
     {
         "py/object": "Data.Scene.scene.Scene",
         "actions": [
             {
                 "py/object": "Data.Scene.action.Action",
+                "_consequence": "",
                 "_description": "Pick up the Key Tree",
                 "enabled": true,
                 "_disableOnSelect": true,
@@ -66,14 +71,14 @@
                             "py/object": "Data.Character.ability.Ability",
                             "_name": "strength",
                             "_description": "",
-                            "score": "8"
+                            "score": 8
                         }
                     ],
                     "items": []
                 },
                 "_reward": {
                     "py/object": "Data.Scene.reward.Reward",
-                    "experience": "1000",
+                    "experience": 500,
                     "items": [
                         {
                             "py/object": "Data.Item.item_reference.ItemRef",
@@ -82,11 +87,13 @@
                         }
                     ]
                 },
+                "_secret": false,
                 "selected": false
             },
             {
                 "py/object": "Data.Scene.action.Action",
-                "_description": "Open the Lock Tree",
+                "_consequence": "",
+                "_description": "Enter the Lock Tree",
                 "enabled": true,
                 "_disableOnSelect": false,
                 "_id": -777,
@@ -105,17 +112,19 @@
                 },
                 "_reward": {
                     "py/object": "Data.Scene.reward.Reward",
-                    "experience": 10,
+                    "experience": 1000,
                     "items": []
                 },
+                "_secret": true,
                 "selected": false
             },
             {
                 "py/object": "Data.Scene.action.Action",
-                "_description": "Return",
+                "_consequence": "You walk into the forest...",
+                "_description": "Take the trail into the forest",
                 "enabled": true,
                 "_disableOnSelect": false,
-                "_id": "-1",
+                "_id": 2,
                 "removed": false,
                 "_removeOnSelect": false,
                 "_requirement": {
@@ -128,48 +137,19 @@
                     "experience": 10,
                     "items": []
                 },
+                "_secret": false,
                 "selected": false
             }
         ],
-        "_enterDescription": "As you approach the giant tree, you notice the hole in the trunk is shaped like a key hole. Off to the side of the Lock Tree, you see a fallen tree in the grass that has one end carved into the shape of a key.",
-        "_exitDescription": "You carry on...",
-        "_imagePath": "Data/Images/Scene/forest.png",
+        "_description": "As you stride through the tall grass towards the giant tree, you notice the hole in the tree appears to be shaped like a key hole. Nearby the base of the tree, you find a fallen tree that appears to be carved into a giant key.",
+        "_imagePath": "Data/Images/Scene/tree.png",
         "_name": "Forest of Awakening, Lock Tree"
     },
     {
         "py/object": "Data.Scene.scene.Scene",
-        "actions": [
-            {
-                "py/object": "Data.Scene.action.Action",
-                "_description": "Greet the monkey",
-                "enabled": true,
-                "_disableOnSelect": false,
-                "_id": -777,
-                "removed": false,
-                "_removeOnSelect": false,
-                "_requirement": {
-                    "py/object": "Data.Scene.requirement.Requirement",
-                    "abilities": [
-                        {
-                            "py/object": "Data.Character.ability.Ability",
-                            "_name": "will",
-                            "_description": "",
-                            "score": "5"
-                        }
-                    ],
-                    "items": []
-                },
-                "_reward": {
-                    "py/object": "Data.Scene.reward.Reward",
-                    "experience": 10,
-                    "items": []
-                },
-                "selected": false
-            }
-        ],
-        "_enterDescription": "The dimly lit trail twists and turns along the hills and trees with bushes occasionally lining the trail. As you make your way, you notice a small monkey off the trail stare you down to see whether it should fight or flee.",
-        "_exitDescription": "You carry on...",
+        "actions": [],
+        "_description": "The trail winds amongst the trees, shrubbery, and hills. Various wildlife chirp, squak and give you the side-eye as you pass. Eventually you come across a lesser traveled trail branching off towards a cave.",
         "_imagePath": "Data/Images/Scene/forest.png",
-        "_name": "Forest of Awakening"
+        "_name": "Forest of Awakening, Trail"
     }
 ]

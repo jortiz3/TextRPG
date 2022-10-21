@@ -2,11 +2,10 @@ from Data.Scene.action import Action
 
 
 class Scene:
-    def __init__(self, name: str = "New Scene", enterDescription: str = "...", exitDescription: str = "You carry on...",
+    def __init__(self, name: str = "New Scene", description: str = "...",
                  imagePath: str = "", actions: list[Action] = []):
         self.actions: list[Action] = actions
-        self._enterDescription = enterDescription
-        self._exitDescription = exitDescription
+        self._description = description
         self._imagePath = imagePath
         self._name = name
 
@@ -37,26 +36,13 @@ class Scene:
         if index < len(self.actions):
             self.actions.pop(index)
 
-    def setReturnAction(self, description: str):
-        if len(self.actions) > 0 and self.actions[-1].id == -1:
-            self.actions[-1].description = description
-            return
-
     @property
-    def enterDescription(self):
-        return self._enterDescription
+    def description(self):
+        return self._description
 
-    @enterDescription.setter
-    def enterDescription(self, value: str):
-        self._enterDescription = value
-
-    @property
-    def exitDescription(self):
-        return self._exitDescription
-
-    @exitDescription.setter
-    def exitDescription(self, value: str):
-        self._exitDescription = value
+    @description.setter
+    def description(self, value: str):
+        self._description = value
 
     @property
     def imagePath(self):
