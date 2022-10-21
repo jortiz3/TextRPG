@@ -6,7 +6,7 @@ from Data.UI.ui import UI
 
 
 class UiNewGame(UI):
-    _introductionText = "Dark... Why is it so dark... Where am I... Who am I..."
+    _introductionText = "Welcome to TextRPG! Please edit your character's name and abilities below."
 
     def __init__(self, window: QtWidgets.QMainWindow):
         super().__init__(window, window_name="NewGameWindow", window_show_size=QtCore.QSize(800, 600),
@@ -15,7 +15,7 @@ class UiNewGame(UI):
         self._centralWidget.setObjectName("centralWidget")
 
         self._introductionLabel = QtWidgets.QLabel(self._centralWidget)
-        self._introductionLabel.setAlignment(QtCore.Qt.AlignVCenter)
+        self._introductionLabel.setAlignment(QtCore.Qt.AlignCenter)
         self._introductionLabel.setWordWrap(True)
         self._introductionLabel.setObjectName("introductionLabel")
 
@@ -38,8 +38,8 @@ class UiNewGame(UI):
         self._centralWidgetLayout.setObjectName("centralWidgetLayout")
 
         self._centralWidgetLayout.addWidget(self._introductionLabel, 0, 0, 2, 4)
-        self._centralWidgetLayout.addWidget(self._nameLabel, 2, 1, 1, 1)
-        self._centralWidgetLayout.addWidget(self._nameInput, 2, 2, 1, 2)
+        self._centralWidgetLayout.addWidget(self._nameLabel, 2, 0, 1, 1)
+        self._centralWidgetLayout.addWidget(self._nameInput, 2, 1, 1, 2)
         self._centralWidgetLayout.addWidget(self._abilityPointsLabel, 3, 1, 1, 1)
         self._centralWidgetLayout.addWidget(self._abilityPointsRemainingLabel, 3, 2, 1, 1)
 
@@ -157,8 +157,12 @@ class UiNewGame(UI):
         ap = -1
         if self.player:
             ap = self.player.ability_points
+        abilityPointsTooltip = self._translate(self._window_name, "Spend ability points now or later to increase your "
+                                                                  "character's abilities.")
         self._abilityPointsLabel.setText(self._translate(self._window_name, "Ability Points (AP):"))
+        self._abilityPointsLabel.setToolTip(abilityPointsTooltip)
         self._abilityPointsRemainingLabel.setText(self._translate(self._window_name, str(ap)))
+        self._abilityPointsRemainingLabel.setToolTip(abilityPointsTooltip)
         self._introductionLabel.setText(self._translate(self._window_name, self._introductionText))
         self._startGameButton.setText(self._translate(self._window_name, "Begin Journey"))
         self._cancelButton.setText(self._translate(self._window_name, "Cancel"))
