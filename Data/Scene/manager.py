@@ -84,7 +84,7 @@ class SceneManager:
         description = ""
         if len(self.currentConsequence) > 0:
             description += "{}\n\n".format(self.currentConsequence)
-        description += self.current().enterDescription if self.current() else ""
+        description += self.current().description if self.current() else ""
         return description
 
     def __setstate__(self, state):

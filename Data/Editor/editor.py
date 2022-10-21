@@ -27,13 +27,14 @@ class Editor(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self.items: list[Item] = self.load(self.__path_items)
-        self.scenes: list[Scene] = self.load(self.__path_scenes)
-        self.actionIndex = 0
-        self.sceneIndex = 0
-        self.requirementAbilityIndex = 0
-        self.requirementItemIndex = 0
-        self.rewardItemIndex = 0
+        self.items: list[Item] = []
+        self.scenes: list[Scene] = []
+        self.actionIndex: int = 0
+        self.sceneIndex: int = 0
+        self.requirementAbilityIndex: int = 0
+        self.requirementItemIndex: int = 0
+        self.rewardItemIndex: int = 0
+        self.reset()
         app = QtWidgets.QApplication(sys.argv)
         self.__initializeUi()
         sys.exit(app.exec())
@@ -183,11 +184,12 @@ class Editor(QtCore.QObject):
         self.requirementAbilityComboBox = QtWidgets.QComboBox(requirementGroupBox)
         self.requirementAbilityComboBox.setEditable(False)
         self.requirementAbilityComboBox.insertItems(0, self.__ability_names)
-        requirementScoreLabel = QtWidgets.QLabel(requirementGroupBox)
-        requirementScoreLabel.setText("Ability Score:")
-        requirementScoreLabel.setToolTip("Score required to take this action.")
-        requirementScoreLabel.setAlignment(QtCore.Qt.AlignRight)
-        self.requirementScoreInput = QtWidgets.QLineEdit(requirementGroupBox)
+        requirementAbilityScoreLabel = QtWidgets.QLabel(requirementGroupBox)
+        requirementAbilityScoreLabel.setText("Ability Score:")
+        requirementAbilityScoreLabel.setToolTip("Score required to take this action.")
+        requirementAbilityScoreLabel.setAlignment(QtCore.Qt.AlignRight)
+        self.requirementAbilityScoreInput = QtWidgets.QLineEdit(requirementGroupBox)
+        self.requirementAbilityScoreInput.setValidator(self.positiveNumberValidator)
         self.requirementAbilityIndexLabel = QtWidgets.QLabel(requirementGroupBox)
         self.requirementAbilityIndexLabel.setFixedWidth(indexLabelWidth)
         self.requirementAbilityIndexLabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -220,6 +222,7 @@ class Editor(QtCore.QObject):
         requirementItemQtyLabel.setToolTip("Quantity of item required to take this action.")
         requirementItemQtyLabel.setAlignment(QtCore.Qt.AlignRight)
         self.requirementItemQtyInput = QtWidgets.QLineEdit(requirementGroupBox)
+        self.requirementItemQtyInput.setValidator(self.positiveNumberValidator)
         self.requirementItemIndexLabel = QtWidgets.QLabel(requirementGroupBox)
         self.requirementItemIndexLabel.setFixedWidth(indexLabelWidth)
         self.requirementItemIndexLabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -295,6 +298,10 @@ class Editor(QtCore.QObject):
         menuDuplicateAction = QtWidgets.QAction(self.window)
         menuDuplicateAction.setText("Action")
         menuDuplicateAction.setShortcut("Ctrl+Shift+D")
+        menuReset = QtWidgets.QAction(self.window)
+        menuReset.setText("Reset")
+        menuReset.setToolTip("Discard all unsaved changes")
+        menuReset.setShortcut("Ctrl+Shift+Delete")
         menuSave = QtWidgets.QAction(self.window)
         menuSave.setText("Save")
         menuSave.setShortcut("Ctrl+S")
@@ -307,6 +314,7 @@ class Editor(QtCore.QObject):
         menuFile = QtWidgets.QMenu(menuBar)
         menuFile.setTitle("File")
         menuFile.addAction(menuSave)
+        menuFile.addAction(menuReset)
         menuEdit = QtWidgets.QMenu(menuBar)
         menuEdit.setTitle("Edit")
         menuEdit.addAction(self.menuUndo)
@@ -360,8 +368,8 @@ class Editor(QtCore.QObject):
         requirementGroupBoxLayout.addLayout(requirementAbilityNavLayout, 0, 0, 1, 1)
         requirementGroupBoxLayout.addWidget(requirementAbilityLabel, 0, 1, 1, 1)
         requirementGroupBoxLayout.addWidget(self.requirementAbilityComboBox, 0, 2, 1, 1)
-        requirementGroupBoxLayout.addWidget(requirementScoreLabel, 0, 3, 1, 1)
-        requirementGroupBoxLayout.addWidget(self.requirementScoreInput, 0, 4, 1, 1)
+        requirementGroupBoxLayout.addWidget(requirementAbilityScoreLabel, 0, 3, 1, 1)
+        requirementGroupBoxLayout.addWidget(self.requirementAbilityScoreInput, 0, 4, 1, 1)
         requirementGroupBoxLayout.addLayout(requirementItemNavLayout, 1, 0, 1, 1)
         requirementGroupBoxLayout.addWidget(requirementItemIdLabel, 1, 1, 1, 1)
         requirementGroupBoxLayout.addWidget(self.requirementItemIdInput, 1, 2, 1, 1)
@@ -448,8 +456,8 @@ class Editor(QtCore.QObject):
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
         self.requirementAbilityComboBox.textActivated.connect(
             partial(self.set, "action.requirement.ability.name", self.requirementAbilityComboBox))
-        self.requirementScoreInput.editingFinished.connect(
-            partial(self.set, "action.requirement.ability.score", self.requirementScoreInput))
+        self.requirementAbilityScoreInput.editingFinished.connect(
+            partial(self.set, "action.requirement.ability.score", self.requirementAbilityScoreInput))
         self.requirementItemIdInput.editingFinished.connect(
             partial(self.set, "action.requirement.item.id", self.requirementItemIdInput))
         self.requirementItemQtyInput.editingFinished.connect(
@@ -483,6 +491,8 @@ class Editor(QtCore.QObject):
         self.itemModel.layoutChanged.connect(self.refresh)
         menuDuplicateAction.triggered.connect(partial(self.duplicate, "action"))
         menuDuplicateScene.triggered.connect(partial(self.duplicate, "scene"))
+        menuReset.triggered.connect(self.reset)
+        menuReset.triggered.connect(self.refresh)
         menuSave.triggered.connect(self.saveAll)
         self.menuUndo.triggered.connect(self.undo)
         self.menuRedo.triggered.connect(self.redo)
@@ -523,14 +533,14 @@ class Editor(QtCore.QObject):
         if target == "scene":
             duplicateScene = copy.deepcopy(scene)
             self.sceneIndex = len(self.scenes)
-            self.scenes.append(duplicateScene)
+            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, duplicateScene, "Duplicate Scene"))
         else:
             actions = scene.actions
             if not actions:
                 return
             duplicateAction = copy.deepcopy(actions[self.actionIndex])
             self.actionIndex = len(actions)
-            actions.append(duplicateAction)
+            self.undoStack.push(UndoNew(actions, self.actionIndex, duplicateAction, "Duplicate Action"))
         self.refresh()
 
     @staticmethod
@@ -730,7 +740,7 @@ class Editor(QtCore.QObject):
                 requirementScoreText = str(ability.score)
             self.requirementAbilityIndexLabel.setText(requirementAbilityIndexText)
             self.requirementAbilityComboBox.setCurrentText(requirementAbilityText)
-            self.requirementScoreInput.setText(requirementScoreText)
+            self.requirementAbilityScoreInput.setText(requirementScoreText)
 
             requirementItemAvailable = bool(
                 len(self.items) > 0 and requirement and requirement.items and self.requirementItemIndex < len(
@@ -793,7 +803,7 @@ class Editor(QtCore.QObject):
             self.nextRequirementAbilityButton.setEnabled(requirementAbilityAvailable)
             self.deleteRequirementAbilityButton.setEnabled(requirementAbilityAvailable)
             self.requirementAbilityComboBox.setEnabled(requirementAbilityAvailable)
-            self.requirementScoreInput.setEnabled(requirementAbilityAvailable)
+            self.requirementAbilityScoreInput.setEnabled(requirementAbilityAvailable)
 
             self.newRequirementItemButton.setEnabled(actionAvailable)
             self.previousRequirementItemButton.setEnabled(requirementItemAvailable)
@@ -812,6 +822,15 @@ class Editor(QtCore.QObject):
         else:
             self.itemView.update()
             self.itemIdValidator.setTop(len(self.items) - 1)
+
+    def reset(self):
+        self.items: list[Item] = self.load(self.__path_items)
+        self.scenes: list[Scene] = self.load(self.__path_scenes)
+        self.actionIndex = 0
+        self.sceneIndex = 0
+        self.requirementAbilityIndex = 0
+        self.requirementItemIndex = 0
+        self.rewardItemIndex = 0
 
     @staticmethod
     def save(path: str, data):
@@ -855,6 +874,9 @@ class Editor(QtCore.QObject):
             value = widget.currentText()
         else:
             value = widget.text()
+
+        if context.endswith("id") or context.endswith("score"):
+            value = int(value)
         target.__setattr__(attribute, value)
 
     def setSceneIndex(self, widget: QtWidgets.QLineEdit):
