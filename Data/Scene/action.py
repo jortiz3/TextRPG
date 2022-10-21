@@ -25,16 +25,6 @@ class Action:
         otherAction: Action = other
         return self.id == otherAction.id and self._description == otherAction._description
 
-    def getDescription(self):
-        """Includes the requirement description."""
-        if self.id == -1:
-            return self._description
-        description = self._description
-        reqDescription = self.requirement.description()
-        if reqDescription:
-            description = "{} {}".format(description, reqDescription)
-        return description
-
     def getState(self):
         """Override to be used conditionally for json pickling."""
         return {"enabled": self.enabled, "removed": self.removed, "selected": self.selected}

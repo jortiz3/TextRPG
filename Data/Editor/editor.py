@@ -439,35 +439,35 @@ class Editor(QtCore.QObject):
         self.window.setCentralWidget(centralWidget)
 
         self.centralTabWidget.currentChanged.connect(self.refresh)
-        self.sceneNameInput.textEdited.connect(partial(self.set, "scene.name", self.sceneNameInput))
-        self.imagePathInput.textEdited.connect(partial(self.set, "scene.imagePath", self.imagePathInput))
+        self.sceneNameInput.textEdited.connect(partial(self.set, "scene._name", self.sceneNameInput))
+        self.imagePathInput.textEdited.connect(partial(self.set, "scene._imagePath", self.imagePathInput))
         self.imagePathButton.clicked.connect(self.pickImageFile)
         self.sceneDescriptionInput.textChanged.connect(
-            partial(self.set, "scene.description", self.sceneDescriptionInput))
-        self.actionIdInput.editingFinished.connect(partial(self.set, "action._id", self.actionIdInput))
+            partial(self.set, "scene._description", self.sceneDescriptionInput))
+        self.actionIdInput.textEdited.connect(partial(self.set, "action._id", self.actionIdInput))
         self.actionDescriptionInput.textEdited.connect(
-            partial(self.set, "action.description", self.actionDescriptionInput))
+            partial(self.set, "action._description", self.actionDescriptionInput))
         self.actionConsequenceInput.textEdited.connect(
             partial(self.set, "action._consequence", self.actionConsequenceInput))
         self.actionSecretCheck.clicked.connect(
-            partial(self.set, "action.secret", self.actionSecretCheck))
+            partial(self.set, "action._secret", self.actionSecretCheck))
         self.disableOnSelectCheck.clicked.connect(
-            partial(self.set, "action.disableOnSelect", self.disableOnSelectCheck))
+            partial(self.set, "action._disableOnSelect", self.disableOnSelectCheck))
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
         self.requirementAbilityComboBox.textActivated.connect(
             partial(self.set, "action.requirement.ability.name", self.requirementAbilityComboBox))
-        self.requirementAbilityScoreInput.editingFinished.connect(
+        self.requirementAbilityScoreInput.textEdited.connect(
             partial(self.set, "action.requirement.ability.score", self.requirementAbilityScoreInput))
-        self.requirementItemIdInput.editingFinished.connect(
+        self.requirementItemIdInput.textEdited.connect(
             partial(self.set, "action.requirement.item.id", self.requirementItemIdInput))
-        self.requirementItemQtyInput.editingFinished.connect(
+        self.requirementItemQtyInput.textEdited.connect(
             partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput))
-        self.rewardExpInput.editingFinished.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
-        self.rewardItemIdInput.editingFinished.connect(
+        self.rewardExpInput.textEdited.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
+        self.rewardItemIdInput.textEdited.connect(
             partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
-        self.rewardItemQtyInput.editingFinished.connect(
+        self.rewardItemQtyInput.textEdited.connect(
             partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
-        self.sceneIndexInput.editingFinished.connect(partial(self.setSceneIndex, self.sceneIndexInput))
+        self.sceneIndexInput.textEdited.connect(partial(self.setSceneIndex, self.sceneIndexInput))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
         self.previousRequirementItemButton.clicked.connect(partial(self.previous, "requirement item"))
         self.previousRewardItemButton.clicked.connect(partial(self.previous, "reward item"))
@@ -631,7 +631,7 @@ class Editor(QtCore.QObject):
             if 0 <= path.find("TextRPG") < dataIndex:
                 path = path[dataIndex:]
                 self.imagePathInput.setText(path)
-                self.imagePathInput.editingFinished.emit()
+                self.imagePathInput.textEdited.emit(path)
                 return
         title = "Error: Invalid Image Selection"
         message = "The '{}' must be within the game directory '{}'.".format(imageFilter, imagePath)
