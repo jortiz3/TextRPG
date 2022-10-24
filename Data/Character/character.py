@@ -1,3 +1,4 @@
+import copy
 import math
 
 from Data.Character.ability import Ability
@@ -16,7 +17,7 @@ class Character:
     __round_digits = 2
 
     def __init__(self, name="", abilities: list[Ability] = [], inventory=Inventory()):
-        self.abilities = abilities if len(abilities) > 0 else self.__default_abilities
+        self.abilities = abilities if len(abilities) > 0 else copy.deepcopy(self.__default_abilities)
         self.inventory = inventory
         self.name = name
 
