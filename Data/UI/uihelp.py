@@ -7,6 +7,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class UiHelp(UI):
     __abilityDescription = "Abilities define a character's skill or means to overcome obstacles within the game."
+    __abilityPointsDescription = "Ability points are used to increase a character's abilities."
+    __characterExperienceDescription = "Experience Points: As a character performs actions, they will earn points."
+    __characterLevelDescription = "Level: Experience milestones at which a character gains one or more " \
+                                  "ability points."
     __inventoryDescription = "The inventory tracks all of the items within a character's possession."
     __itemDescription = "Items can be used to overcome obstacles on a character's journey."
     __sceneDescription = "Scenes are the opportunities and obstacles presented to a character."
@@ -36,12 +40,23 @@ class UiHelp(UI):
         self._characterGroupBox = QtWidgets.QGroupBox(self._scrollContent)
         self._characterGroupBox.setMinimumSize(groupBoxSize)
         self._characterGroupBox.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self._characterExperienceLabel = QtWidgets.QLabel(self._characterGroupBox)
+        self._characterExperienceLabel.setMinimumSize(labelSize)
+        self._characterExperienceLabel.setWordWrap(True)
+        self._characterLevelLabel = QtWidgets.QLabel(self._characterGroupBox)
+        self._characterLevelLabel.setMinimumSize(labelSize)
+        self._characterLevelLabel.setWordWrap(True)
         self._abilityGroupBox = QtWidgets.QGroupBox(self._characterGroupBox)
         self._abilityGroupBox.setMinimumSize(groupBoxSize)
         self._abilityGroupBox.setFlat(True)
         self._abilityLabel = QtWidgets.QLabel(self._abilityGroupBox)
         self._abilityLabel.setMinimumSize(labelSize)
         self._abilityLabel.setWordWrap(True)
+        abilityPointsIcon = QtWidgets.QLabel(self._abilityGroupBox)
+        abilityPointsIcon.setPixmap(self._abilityIcons["points"].pixmap(iconSize))
+        self._abilityPointsLabel = QtWidgets.QLabel(self._abilityGroupBox)
+        self._abilityPointsLabel.setMinimumSize(labelSize)
+        self._abilityPointsLabel.setWordWrap(True)
         dexterityIcon = QtWidgets.QLabel(self._abilityGroupBox)
         dexterityIcon.setPixmap(self._abilityIcons["dexterity"].pixmap(iconSize))
         self._dexterityLabel = QtWidgets.QLabel(self._abilityGroupBox)
@@ -117,16 +132,18 @@ class UiHelp(UI):
 
         abilityLayout = QtWidgets.QGridLayout()
         abilityLayout.addWidget(self._abilityLabel, 0, 0, 1, 3)
-        abilityLayout.addWidget(dexterityIcon, 1, 0, 1, 1)
-        abilityLayout.addWidget(self._dexterityLabel, 1, 1, 1, 2)
-        abilityLayout.addWidget(intelligenceIcon, 2, 0, 1, 1)
-        abilityLayout.addWidget(self._intelligenceLabel, 2, 1, 1, 2)
-        abilityLayout.addWidget(strengthIcon, 3, 0, 1, 1)
-        abilityLayout.addWidget(self._strengthLabel, 3, 1, 1, 2)
-        abilityLayout.addWidget(willIcon, 4, 0, 1, 1)
-        abilityLayout.addWidget(self._willLabel, 4, 1, 1, 2)
-        abilityLayout.addWidget(wisdomIcon, 5, 0, 1, 1)
-        abilityLayout.addWidget(self._wisdomLabel, 5, 1, 1, 2)
+        abilityLayout.addWidget(abilityPointsIcon, 1, 0, 1, 1)
+        abilityLayout.addWidget(self._abilityPointsLabel, 1, 1, 1, 2)
+        abilityLayout.addWidget(dexterityIcon, 2, 0, 1, 1)
+        abilityLayout.addWidget(self._dexterityLabel, 2, 1, 1, 2)
+        abilityLayout.addWidget(intelligenceIcon, 3, 0, 1, 1)
+        abilityLayout.addWidget(self._intelligenceLabel, 3, 1, 1, 2)
+        abilityLayout.addWidget(strengthIcon, 4, 0, 1, 1)
+        abilityLayout.addWidget(self._strengthLabel, 4, 1, 1, 2)
+        abilityLayout.addWidget(willIcon, 5, 0, 1, 1)
+        abilityLayout.addWidget(self._willLabel, 5, 1, 1, 2)
+        abilityLayout.addWidget(wisdomIcon, 6, 0, 1, 1)
+        abilityLayout.addWidget(self._wisdomLabel, 6, 1, 1, 2)
         self._abilityGroupBox.setLayout(abilityLayout)
 
         inventoryLayout = QtWidgets.QGridLayout()
@@ -136,6 +153,8 @@ class UiHelp(UI):
         self._inventoryGroupBox.setLayout(inventoryLayout)
 
         characterLayout = QtWidgets.QVBoxLayout()
+        characterLayout.addWidget(self._characterExperienceLabel)
+        characterLayout.addWidget(self._characterLevelLabel)
         characterLayout.addWidget(self._abilityGroupBox)
         characterLayout.addWidget(self._inventoryGroupBox)
         self._characterGroupBox.setLayout(characterLayout)
@@ -184,8 +203,12 @@ class UiHelp(UI):
 
     def refresh(self):
         self._characterGroupBox.setTitle(self._translate(self._window_name, "Character"))
+        self._characterExperienceLabel.setText(
+            self._translate(self._window_name, self.__characterExperienceDescription))
+        self._characterLevelLabel.setText(self._translate(self._window_name, self.__characterLevelDescription))
         self._abilityGroupBox.setTitle(self._translate(self._window_name, "Abilities"))
         self._abilityLabel.setText(self._translate(self._window_name, self.__abilityDescription))
+        self._abilityPointsLabel.setText(self._translate(self._window_name, self.__abilityPointsDescription))
         self._dexterityLabel.setText(self._translate(self._window_name, self.__dexterityDescription))
         self._intelligenceLabel.setText(self._translate(self._window_name, self.__intelligenceDescription))
         self._strengthLabel.setText(self._translate(self._window_name, self.__strengthDescription))
