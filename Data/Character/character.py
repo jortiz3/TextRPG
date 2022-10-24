@@ -8,11 +8,11 @@ from Data.Item.item_reference import ItemRef
 
 class Character:
     __default_abilities = [
-        Ability("dexterity", "Ability checks", 1.0),
-        Ability("intelligence", "Ability checks and enchanting", 1.0),
-        Ability("strength", "Ability checks and crafting", 1.0),
-        Ability("will", "Ability checks and crafting", 1.0),
-        Ability("wisdom", "Ability checks and enchanting", 1.0),
+        Ability("dexterity", "Used for ability checks.", 1.0),
+        Ability("intelligence", "Used for ability checks and enchanting.", 1.0),
+        Ability("strength", "Used for ability checks and crafting.", 1.0),
+        Ability("will", "Used for ability checks and crafting.", 1.0),
+        Ability("wisdom", "Used for ability checks and enchanting.", 1.0),
     ]
     __round_digits = 2
 
