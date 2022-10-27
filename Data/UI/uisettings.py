@@ -57,23 +57,26 @@ class UiSettings(UI):
         if get_scene_path:
             self._getScenePath = get_scene_path
         if set_item_path:
-            self._itemFilePickerButton.clicked.connect(partial(self.pickDatabaseFile, self._itemFilePathLabel, set_item_path))
+            self._itemFilePickerButton.clicked.connect(
+                partial(self.pickDatabaseFile, self._itemFilePathLabel, set_item_path))
         if set_scene_path:
-            self._sceneFilePickerButton.clicked.connect(partial(self.pickDatabaseFile, self._sceneFilePathLabel, set_scene_path))
+            self._sceneFilePickerButton.clicked.connect(
+                partial(self.pickDatabaseFile, self._sceneFilePathLabel, set_scene_path))
 
     def pickDatabaseFile(self, label: QtWidgets.QLabel, callback):
         dbPath = "Data"
         dbFilter = "Json File (*.json)"
         dialogOutput = QtWidgets.QFileDialog.getOpenFileName(self.window, "Select Json File", dbPath, dbFilter)
-        if dialogOutput:
-            filePath = dialogOutput[0]
-            dataIndex = filePath.find("Data")
-            if 0 <= filePath.find("TextRPG") < dataIndex:
-                filePath = filePath[dataIndex:]
-                label.setText(self._translate(self._window_name, filePath))
-                if callback:
-                    callback(filePath)
-                return
+        if dialogOutput[0] == "":
+            return
+        filePath = dialogOutput[0]
+        dataIndex = filePath.find("Data")
+        if 0 <= filePath.find("TextRPG") < dataIndex:
+            filePath = filePath[dataIndex:]
+            label.setText(self._translate(self._window_name, filePath))
+            if callback:
+                callback(filePath)
+            return
         title = "Error: Invalid File Selection"
         message = "The '{}' must be within the game directory '{}'.".format(dbFilter, dbPath)
         icon = QtWidgets.QMessageBox.Warning

@@ -18,15 +18,17 @@ from Data.Scene.reward import Reward
 from Data.Scene.scene import Scene
 from Data.Scene.action import Action
 from Data.Item.item import Item
+from Data.UI.uisettings import UiSettings
 
 
 class Editor(QtCore.QObject):
-    __path_scenes = "Data/scenes.json"
-    __path_items = "Data/items.json"
     __ability_names = ["dexterity", "intelligence", "strength", "will", "wisdom"]
 
     def __init__(self):
         super().__init__()
+        self.configPath = "editor.json"
+        self.sceneDatabasePath = "Data/scenes.json"
+        self.itemDatabasePath = "Data/items.json"
         self.items: list[Item] = []
         self.scenes: list[Scene] = []
         self.actionIndex: int = 0
@@ -298,6 +300,8 @@ class Editor(QtCore.QObject):
         menuDuplicateAction = QtWidgets.QAction(self.window)
         menuDuplicateAction.setText("Action")
         menuDuplicateAction.setShortcut("Ctrl+Shift+D")
+        menuSettings = QtWidgets.QAction(self.window)
+        menuSettings.setText("Settings")
         menuReset = QtWidgets.QAction(self.window)
         menuReset.setText("Reset")
         menuReset.setToolTip("Discard all unsaved changes")
@@ -324,6 +328,7 @@ class Editor(QtCore.QObject):
         menuDuplicate.addAction(menuDuplicateScene)
         menuDuplicate.addAction(menuDuplicateAction)
         menuEdit.addAction(menuDuplicate.menuAction())
+        menuEdit.addAction(menuSettings)
         menuBar.addMenu(menuFile)
         menuBar.addMenu(menuEdit)
         self.window.setMenuBar(menuBar)
@@ -438,6 +443,12 @@ class Editor(QtCore.QObject):
         centralWidget.setLayout(centralLayout)
         self.window.setCentralWidget(centralWidget)
 
+        self.settingsUi = UiSettings(QtWidgets.QMainWindow())
+        self.settingsUi.connect(get_item_path=partial(self.__getattribute__, "itemDatabasePath"),
+                                get_scene_path=partial(self.__getattribute__, "sceneDatabasePath"),
+                                set_item_path=self.setItemDatabasePath,
+                                set_scene_path=self.setSceneDatabasePath)
+
         self.centralTabWidget.currentChanged.connect(self.refresh)
         self.sceneNameInput.textEdited.connect(partial(self.set, "scene._name", self.sceneNameInput))
         self.imagePathInput.textEdited.connect(partial(self.set, "scene._imagePath", self.imagePathInput))
@@ -449,8 +460,7 @@ class Editor(QtCore.QObject):
             partial(self.set, "action._description", self.actionDescriptionInput))
         self.actionConsequenceInput.textEdited.connect(
             partial(self.set, "action._consequence", self.actionConsequenceInput))
-        self.actionSecretCheck.clicked.connect(
-            partial(self.set, "action._secret", self.actionSecretCheck))
+        self.actionSecretCheck.clicked.connect(partial(self.set, "action._secret", self.actionSecretCheck))
         self.disableOnSelectCheck.clicked.connect(
             partial(self.set, "action._disableOnSelect", self.disableOnSelectCheck))
         self.removeOnSelectCheck.clicked.connect(partial(self.set, "action._removeOnSelect", self.removeOnSelectCheck))
@@ -463,8 +473,7 @@ class Editor(QtCore.QObject):
         self.requirementItemQtyInput.textEdited.connect(
             partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput))
         self.rewardExpInput.textEdited.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
-        self.rewardItemIdInput.textEdited.connect(
-            partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
+        self.rewardItemIdInput.textEdited.connect(partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
         self.rewardItemQtyInput.textEdited.connect(
             partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
         self.sceneIndexInput.textEdited.connect(partial(self.setSceneIndex, self.sceneIndexInput))
@@ -491,6 +500,8 @@ class Editor(QtCore.QObject):
         self.itemModel.layoutChanged.connect(self.refresh)
         menuDuplicateAction.triggered.connect(partial(self.duplicate, "action"))
         menuDuplicateScene.triggered.connect(partial(self.duplicate, "scene"))
+        menuSettings.triggered.connect(self.settingsUi.refresh)
+        menuSettings.triggered.connect(self.settingsUi.show)
         menuReset.triggered.connect(self.reset)
         menuReset.triggered.connect(self.refresh)
         menuSave.triggered.connect(self.saveAll)
@@ -550,6 +561,15 @@ class Editor(QtCore.QObject):
         with open(path, 'r') as file:
             return jsonpickle.decode(file.read())
 
+    @staticmethod
+    def loadConfig():
+        if not exists(Editor.configPath):
+            return
+        with open(Editor.configPath, 'r') as file:
+            data = jsonpickle.decode(file.read())
+            Editor.__path_items = data["itemPath"]
+            Editor.__path_scenes = data["scenePath"]
+
     def new(self, context: str):
         description = "New {}".format(context.capitalize())
         if context == "scene":
@@ -577,7 +597,9 @@ class Editor(QtCore.QObject):
             self.undoStack.push(UndoNew(abilities, self.requirementAbilityIndex, newAbility, description))
         elif context.__contains__("item"):
             if len(self.items) <= 0:
-                self.noExistingItemsDialog()
+                title = "Error: No Existing Items"
+                message = "There must be at least 1 item created in the 'Item' tab before requirements & rewards can use them."
+                self.popup(title, message)
             elif context.__contains__("requirement"):
                 requirementItems = self.scenes[self.sceneIndex].actions[self.actionIndex].requirement.items
                 self.requirementItemIndex = len(requirementItems)
@@ -613,14 +635,6 @@ class Editor(QtCore.QObject):
             self.rewardItemIndex += 1
         self.refresh()
 
-    def noExistingItemsDialog(self):
-        title = "Error: No Existing Items"
-        message = "There must be at least 1 item created in the 'Item' tab before requirements & rewards can use them."
-        icon = QtWidgets.QMessageBox.Warning
-        buttons = QtWidgets.QMessageBox.Ok
-        messageBox = QtWidgets.QMessageBox(icon, title, message, buttons, self.window)
-        messageBox.exec()
-
     def pickImageFile(self):
         imagePath = "Data/Images/Scene"
         imageFilter = "Image File (*.png)"
@@ -635,6 +649,9 @@ class Editor(QtCore.QObject):
                 return
         title = "Error: Invalid Image Selection"
         message = "The '{}' must be within the game directory '{}'.".format(imageFilter, imagePath)
+        self.popup(title, message)
+
+    def popup(self, title: str, message: str):
         icon = QtWidgets.QMessageBox.Warning
         buttons = QtWidgets.QMessageBox.Ok
         messageBox = QtWidgets.QMessageBox(icon, title, message, buttons, self.window)
@@ -824,8 +841,12 @@ class Editor(QtCore.QObject):
             self.itemIdValidator.setTop(len(self.items) - 1)
 
     def reset(self):
-        self.items: list[Item] = self.load(self.__path_items)
-        self.scenes: list[Scene] = self.load(self.__path_scenes)
+        self.items: list[Item] = self.load(self.itemDatabasePath)
+        if not isinstance(self.items, list) or len(self.items) <= 0 or not isinstance(self.items[0], Item):
+            self.popup("Database Error", "The Item database is either formatted incorrectly or does not exist.")
+        self.scenes: list[Scene] = self.load(self.sceneDatabasePath)
+        if not isinstance(self.scenes, list) or len(self.scenes) <= 0 or not isinstance(self.scenes[0], Scene):
+            self.popup("Database Error", "The Scene database is either formatted incorrectly or does not exist.")
         self.actionIndex = 0
         self.sceneIndex = 0
         self.requirementAbilityIndex = 0
@@ -838,10 +859,16 @@ class Editor(QtCore.QObject):
             file.write(jsonpickle.encode(data, indent=4))
 
     def saveAll(self):
-        self.save(self.__path_items, self.items)
-        self.save(self.__path_scenes, self.scenes)
+        self.save(self.itemDatabasePath, self.items)
+        self.save(self.sceneDatabasePath, self.scenes)
+        self.saveConfig()
         self.undoStack.clear()
         self.refresh()
+
+    def saveConfig(self):
+        data = {"itemPath": self.itemDatabasePath, "scenePath": self.sceneDatabasePath}
+        with open(self.configPath, 'w') as file:
+            file.write(jsonpickle.encode(data, indent=4))
 
     def set(self, context: str, widget):
         if self.sceneIndex >= len(self.scenes):
@@ -878,6 +905,12 @@ class Editor(QtCore.QObject):
         if context.endswith("id") or context.endswith("score") or context.endswith("experience"):
             value = int(value)
         target.__setattr__(attribute, value)
+
+    def setItemDatabasePath(self, path: str):
+        self.itemDatabasePath = path
+
+    def setSceneDatabasePath(self, path: str):
+        self.sceneDatabasePath = path
 
     def setSceneIndex(self, widget: QtWidgets.QLineEdit):
         try:

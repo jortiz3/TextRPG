@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from functools import partial
 from json import JSONDecodeError
 from os.path import exists
 
@@ -38,7 +39,8 @@ class Game:
         self._ui.loadMenu().connect(delete_save=self.deleteSave, load_save=self.loadGame, load_info=self.loadInfo)
         self._ui.mainMenu().connect(goto_new=self.newGame)
         self._ui.newGameMenu().connect(player=self._player, start_game=self.startGame)
-        self._ui.settingsMenu().connect(get_item_path=self.getItemFilePath, get_scene_path=self.getSceneFilePath,
+        self._ui.settingsMenu().connect(get_item_path=partial(self.__getattribute__, "_itemFilePath"),
+                                        get_scene_path=partial(self.__getattribute__, "_sceneFilePath"),
                                         set_item_path=self.setItemFilePath, set_scene_path=self.setSceneFilePath)
         self._ui.show("main")
         self._loadConfig()
@@ -50,12 +52,6 @@ class Game:
         if not filepath:
             return
         os.remove(filepath)
-
-    def getItemFilePath(self):
-        return self._itemFilePath
-
-    def getSceneFilePath(self):
-        return self._sceneFilePath
 
     def __getstate__(self):
         return {"_player": self._player, "_sceneManager": self._sceneManager}
