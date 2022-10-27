@@ -1,6 +1,8 @@
 import os
 import sys
 import time
+from json import JSONDecodeError
+from os.path import exists
 
 import jsonpickle
 
@@ -19,6 +21,9 @@ class Game:
     def __init__(self):
         self._player: Player = Player()
         self._sceneManager = SceneManager(self._player)
+        self._configPath = "game.json"
+        self._itemFilePath = "Data/items.json"
+        self._sceneFilePath = "Data/scenes.json"
         self._directory = 'Saves'
         self._fileExtension = "json"
         Ability.__getstate__ = Ability.getState
@@ -33,9 +38,10 @@ class Game:
         self._ui.loadMenu().connect(delete_save=self.deleteSave, load_save=self.loadGame, load_info=self.loadInfo)
         self._ui.mainMenu().connect(goto_new=self.newGame)
         self._ui.newGameMenu().connect(player=self._player, start_game=self.startGame)
+        self._ui.settingsMenu().connect(get_item_path=self.getItemFilePath, get_scene_path=self.getSceneFilePath,
+                                        set_item_path=self.setItemFilePath, set_scene_path=self.setSceneFilePath)
         self._ui.show("main")
-
-        ItemDatabase.initialize()
+        self._loadConfig()
 
         sys.exit(self._app.exec())
 
@@ -45,17 +51,35 @@ class Game:
             return
         os.remove(filepath)
 
+    def getItemFilePath(self):
+        return self._itemFilePath
+
+    def getSceneFilePath(self):
+        return self._sceneFilePath
+
     def __getstate__(self):
-        return {
-            "_player": self._player,
-            "_sceneManager": self._sceneManager
-        }
+        return {"_player": self._player, "_sceneManager": self._sceneManager}
+
+    def _loadConfig(self):
+        if not exists(self._configPath):
+            return
+        with open(self._configPath, 'r') as file:
+            config = file.read()
+            if len(config) > 0:
+                try:
+                    config = jsonpickle.decode(config)
+                    self._itemFilePath = config["itemPath"]
+                    self._sceneFilePath = config["scenePath"]
+                except JSONDecodeError:
+                    self._ui.popup("Configuration Error", "Failed to load '{}'. The default values have been "
+                                                          "loaded.".format(self._configPath))
 
     def loadGame(self, save_index: int):
         save_filepath = self._saveFilepath(save_index)
         if not save_filepath:
             return
-        self._sceneManager.reset()
+        if not self._reset():
+            return
         with open(save_filepath, 'r') as save_file:
             save_data = jsonpickle.decode(save_file.read())
             self._player.copyAttributes(save_data._player)
@@ -74,9 +98,26 @@ class Game:
         return info
 
     def newGame(self):
-        self._player.resetAttributes()
-        self._sceneManager.reset()
+        if not self._reset():
+            return
         self._ui.show("new")
+
+    def _reset(self):
+        self._player.resetAttributes()
+        try:
+            ItemDatabase.initialize(self._itemFilePath)
+            self._sceneManager.reset(self._sceneFilePath)
+            self._saveConfig()
+        except ValueError as ve:
+            self._ui.popup("Settings Error", str(ve))
+            return False
+        return True
+
+    def _saveConfig(self):
+        config_object = {"itemPath": self._itemFilePath, "scenePath": self._sceneFilePath}
+        config = jsonpickle.encode(config_object, indent=4)
+        with open(self._configPath, 'w') as file:
+            file.write(config)
 
     def _saveFilepath(self, file_index: int):
         files = os.listdir(self._directory)
@@ -97,6 +138,12 @@ class Game:
         nextMenu = self._sceneManager.selectAction(index)
         if nextMenu:
             self._ui.show(nextMenu)
+
+    def setItemFilePath(self, value: str):
+        self._itemFilePath = value
+
+    def setSceneFilePath(self, value: str):
+        self._sceneFilePath = value
 
     def __setstate__(self, state):
         self.__dict__.update(state)

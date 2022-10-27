@@ -24,6 +24,7 @@ class UI(ABC):
                  window_min_size=QtCore.QSize(700, 500), window_name="MainWindow",
                  window_show_size: QtCore.QSize = None, window_title="Text RPG - Game"):
         self._checkIcon = QtGui.QIcon("Data/Images/UI/check.png")
+        self._folderIcon = QtGui.QIcon("Data/Images/UI/folder.png")
         self._gameIcon = QtGui.QIcon("Data/Images/UI/game.png")
         self._itemIcon = QtGui.QIcon("Data/Images/UI/key.png")
         self._requirementIcon = QtGui.QIcon("Data/Images/UI/checklist.png")

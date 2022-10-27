@@ -7,12 +7,18 @@ from Data.Item.item import Item
 
 class ItemDatabase:
     __db: list[Item] = []
-    __db_path = "Data/items.json"
 
     @staticmethod
-    def initialize():
-        with open(ItemDatabase.__db_path, 'r') as itemdb:
+    def initialize(path: str):
+        with open(path, 'r') as itemdb:
             ItemDatabase.__db = jsonpickle.decode(itemdb.read())
+        message = "File at path '{}' did not contain {}."
+        if not isinstance(ItemDatabase.__db, list):
+            raise ValueError(message.format(path, "a list"))
+        elif len(ItemDatabase.__db) <= 0:
+            raise ValueError("a populated list")
+        elif not isinstance(ItemDatabase.__db[0], Item):
+            raise ValueError(message.format(path, "a list of Items"))
 
     @staticmethod
     def get(db_id: int) -> Item:

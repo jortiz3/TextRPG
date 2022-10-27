@@ -5,10 +5,8 @@ from Data.Character.player import Player
 
 
 class SceneManager:
-    __default_path = "Data/scenes.json"
-
     def __init__(self, player: Player = Player()):
-        self.scenes = self._loadScenes()
+        self.scenes = []
         self.__player = player
         self.currentSceneIndex = 0
         self.previousSceneIndexes: list[int] = []
@@ -58,9 +56,16 @@ class SceneManager:
             self.currentSceneIndex = index
         return None
 
-    def _loadScenes(self):
-        with open(self.__default_path, 'r') as scenes_file:
-            return jsonpickle.decode(scenes_file.read())
+    def _loadScenes(self, path: str):
+        with open(path, 'r') as scenes_file:
+            self.scenes = jsonpickle.decode(scenes_file.read())
+        message = "File at path '{}' did not contain {}."
+        if not isinstance(self.scenes, list):
+            raise ValueError(message.format(path, "a list"))
+        elif len(self.scenes) <= 0:
+            raise ValueError("a populated list")
+        elif not isinstance(self.scenes[0], Scene):
+            raise ValueError(message.format(path, "a list of Scenes"))
 
     def previous(self):
         """Retrieves the previous scene."""
@@ -71,10 +76,10 @@ class SceneManager:
             return None
         return self.scenes[self.previousSceneIndexes[-1]]
 
-    def reset(self):
+    def reset(self, path: str):
         self.currentSceneIndex = 0
         self.previousSceneIndexes = []
-        self.scenes = self._loadScenes()
+        self._loadScenes(path)
 
     def sceneDescription(self):
         """
