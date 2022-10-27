@@ -62,28 +62,42 @@ class UiGame(UI):
         self._powerLabel = QtWidgets.QLabel(characterTab)
         self._craftBonusLabel = QtWidgets.QLabel(characterTab)
         self._enchantBonusLabel = QtWidgets.QLabel(characterTab)
-        self._dodgeLabel = QtWidgets.QLabel(characterTab)
-        self._runLabel = QtWidgets.QLabel(characterTab)
+        self._abilityPointsIcon = QtWidgets.QLabel(characterTab)
+        self._abilityPointsIcon.setPixmap(self._abilityIcons["points"].pixmap(self._tinyButtonSize))
         self._abilityPointsLabel = QtWidgets.QLabel(characterTab)
+        spacer = QtWidgets.QSpacerItem(25, 25, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        abilityPointsLayout = QtWidgets.QHBoxLayout()
+        abilityPointsLayout.addWidget(self._abilityPointsIcon)
+        abilityPointsLayout.addWidget(self._abilityPointsLabel)
+        abilityPointsLayout.addItem(spacer)
+
         characterTabLayout = QtWidgets.QGridLayout(self._playerInfoTabs)
         characterTabLayout.addWidget(self._levelLabel, 0, 0, 1, 1)
         characterTabLayout.addWidget(self._expLabel, 0, 1, 1, 1)
         characterTabLayout.addWidget(self._powerLabel, 1, 1, 1, 1)
-        characterTabLayout.addWidget(self._abilityPointsLabel, 1, 0, 1, 1)
+        characterTabLayout.addLayout(abilityPointsLayout, 1, 0, 1, 1)
+        self._iconFormat = "{}Icon"
         self._labelFormat = "{}Label"
         self._scoreFormat = "{}ScoreLabel"
         self._incrementFormat = "{}IncrementButton"
         self._abilityWidgets: dict[str, QtWidgets.QWidget] = {}
         for abilityIndex, abilityName in enumerate(self._abilityNames):
             row = abilityIndex + 3
+
+            abilityIcon = QtWidgets.QLabel(characterTab)
+            abilityIcon.setPixmap(self._abilityIcons[abilityName.lower()].pixmap(self._tinyButtonSize))
+            abilityIcon.setAlignment(QtCore.Qt.AlignCenter)
+            abilityIconKey = self._iconFormat.format(abilityName)
+            self._abilityWidgets[abilityIconKey] = abilityIcon
+
             abilityLabel = QtWidgets.QLabel(characterTab)
-            abilityLabel.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
+            abilityLabel.setAlignment(QtCore.Qt.AlignCenter)
             abilityLabelKey = self._labelFormat.format(abilityName)
             abilityLabel.setObjectName(abilityLabelKey)
             self._abilityWidgets[abilityLabelKey] = abilityLabel
 
             abilityScoreLabel = QtWidgets.QLabel(characterTab)
-            abilityScoreLabel.setAlignment(QtCore.Qt.AlignVCenter)
+            abilityScoreLabel.setAlignment(QtCore.Qt.AlignCenter)
             abilityScoreLabel.setStyleSheet(self._boldStyleSheet)
             abilityScoreLabelKey = self._scoreFormat.format(abilityName)
             abilityScoreLabel.setObjectName(abilityScoreLabelKey)
@@ -95,14 +109,24 @@ class UiGame(UI):
             incrementButton.setFixedSize(self._tinyButtonSize)
             self._abilityWidgets[incrementButtonKey] = incrementButton
 
-            characterTabLayout.addWidget(abilityLabel, row, 0, 1, 1)
-            characterTabLayout.addWidget(abilityScoreLabel, row, 1, 1, 1)
-            characterTabLayout.addWidget(incrementButton, row, 2, 1, 1)
+            spacer = QtWidgets.QSpacerItem(25, 25, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            abilityLayout = QtWidgets.QHBoxLayout()
+            abilityLayout.addWidget(abilityIcon)
+            abilityLayout.addWidget(abilityLabel)
+            abilityLayout.addItem(spacer)
+
+            spacer = QtWidgets.QSpacerItem(25, 25, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            scoreLayout = QtWidgets.QHBoxLayout()
+            scoreLayout.setAlignment(QtCore.Qt.AlignLeft)
+            scoreLayout.addWidget(abilityScoreLabel)
+            scoreLayout.addWidget(incrementButton)
+            scoreLayout.addItem(spacer)
+
+            characterTabLayout.addLayout(abilityLayout, row, 0, 1, 1)
+            characterTabLayout.addLayout(scoreLayout, row, 1, 1, 1)
 
         characterTabLayout.addWidget(self._craftBonusLabel, 9, 0, 1, 1)
         characterTabLayout.addWidget(self._enchantBonusLabel, 9, 1, 1, 1)
-        characterTabLayout.addWidget(self._dodgeLabel, 10, 0, 1, 1)
-        characterTabLayout.addWidget(self._runLabel, 10, 1, 1, 1)
         characterTab.setLayout(characterTabLayout)
 
         self._inventoryTable = QtWidgets.QTableView(self._playerInfoTabs)
@@ -134,6 +158,8 @@ class UiGame(UI):
         self._menuPosition.setObjectName("menuPosition")
         self._menuResize = QtWidgets.QMenu(self._menuWindow)
         self._menuResize.setObjectName("menuResize")
+        self._menuHelp = QtWidgets.QAction(self._menubar)
+        self._menuHelp.setObjectName("menuHelp")
         self._window.setMenuBar(self._menubar)
         self._action_topLeft = QtWidgets.QAction(self._window)
         self._action_topLeft.setShortcutVisibleInContextMenu(False)
@@ -173,6 +199,7 @@ class UiGame(UI):
         self._menuWindow.addAction(self._menuPosition.menuAction())
         self._menubar.addAction(self._menuFile.menuAction())
         self._menubar.addAction(self._menuWindow.menuAction())
+        self._menubar.addAction(self._menuHelp)
 
         self._getScene = None
         self._getSceneDescription = None
@@ -186,7 +213,7 @@ class UiGame(UI):
         QtCore.QMetaObject.connectSlotsByName(self._window)
 
     def connect(self, get_scene=None, get_scene_description=None, player=None, save_game=None, select_action=None,
-                show_load=None, show_main=None):
+                show_help=None, show_load=None, show_main=None):
         if get_scene:
             self._getScene = get_scene
         if get_scene_description:
@@ -205,6 +232,8 @@ class UiGame(UI):
                 scene_action_button = self._sceneActionButtons[index]
                 scene_action_button.clicked.connect(partial(select_action, index))
                 scene_action_button.clicked.connect(self.refresh)
+        if show_help:
+            self._menuHelp.triggered.connect(show_help)
         if show_load:
             self._actionLoad.triggered.connect(show_load)
         if show_main:
@@ -225,7 +254,7 @@ class UiGame(UI):
         if self._getSceneDescription:
             scene_description = self._getSceneDescription()
         self._sceneDescriptionLabel.setText(self._translate(self._window_name, scene_description))
-        self._sceneActionsGroupBox.setTitle(self._translate(self._window_name, "Scene Actions"))
+        self._sceneActionsGroupBox.setTitle(self._translate(self._window_name, "Actions"))
 
         for index, action_button in enumerate(self._sceneActionButtons):
             if scene:
@@ -256,47 +285,52 @@ class UiGame(UI):
         powerText = "POWER: {}"
         craftBonusText = "CRAFT: {}"
         enchantBonusText = "ENCH: {}"
-        dodgeText = "DODGE: {}"
-        runText = "RUN: {}"
         if self._player:
             levelText = levelText.format(self._player.level)
             expText = expText.format(self._player.experience, self._player.requiredExperience())
-            dodgeText = dodgeText.format(self._player.dodgeBonus())
-            runText = runText.format(self._player.runBonus())
             powerText = powerText.format(self._player.powerLevel())
             craftBonusText = craftBonusText.format(self._player.craftingBonus())
             enchantBonusText = enchantBonusText.format(self._player.enchantingBonus())
         self._levelLabel.setText(self._translate(self._window_name, levelText))
         self._expLabel.setText(self._translate(self._window_name, expText))
         self._powerLabel.setText(self._translate(self._window_name, powerText))
+        self._powerLabel.setToolTip(self._translate(self._window_name, "The total power of the player character."))
         self._craftBonusLabel.setText(self._translate(self._window_name, craftBonusText))
         self._enchantBonusLabel.setText(self._translate(self._window_name, enchantBonusText))
-        self._dodgeLabel.setText(self._translate(self._window_name, dodgeText))
-        self._runLabel.setText(self._translate(self._window_name, runText))
 
         ap = -1
         if self._player:
             ap = self._player.ability_points
         self._abilityPointsLabel.setText(self._translate(self._window_name, "AP: {}".format(ap)))
+        apTooltip = self._translate(self._window_name, "Ability Points")
+        self._abilityPointsIcon.setToolTip(apTooltip)
+        self._abilityPointsLabel.setToolTip(apTooltip)
         labelText = "{}:"
         scoreText = "{}"
         incrementText = "+"
+        incrementTooltip = "Increase {}"
         for abilityName in self._abilityNames:
+            abilityAbbreviation = abilityName[0:3].upper()
             abilityDescription = ""
             abilityScore = -1
             if self._player:
-                abilityDescription = self._player.ability(abilityName, "description")
+                abilityDescription = self._translate(self._window_name, self._player.ability(abilityName,
+                                                                                             "description"))
                 abilityScore = self._player.ability(abilityName)
+            abilityIcon = self._abilityWidgets[self._iconFormat.format(abilityName)]
+            abilityIcon.setToolTip(abilityDescription)
             abilityLabel = self._abilityWidgets[self._labelFormat.format(abilityName)]
-            abilityLabel.setText(self._translate(self._window_name, labelText.format(abilityName[0:3].upper())))
-            abilityLabel.setToolTip(self._translate(self._window_name, abilityDescription))
+            abilityLabel.setText(self._translate(self._window_name, labelText.format(abilityAbbreviation)))
+            abilityLabel.setToolTip(abilityDescription)
             abilityScoreLabel = self._abilityWidgets[self._scoreFormat.format(abilityName)]
             abilityScoreLabel.setText(self._translate(self._window_name, scoreText.format(abilityScore)))
+            abilityScoreLabel.setToolTip(self._translate(self._window_name, abilityDescription))
             if abilityScore >= self._player.maxAbilityScore():
                 abilityScoreLabel.setStyleSheet(self._greenStyleSheet)
             incrementButton = self._abilityWidgets[self._incrementFormat.format(abilityName)]
             incrementButton.setText(self._translate(self._window_name, incrementText))
             incrementButton.setEnabled(ap > 0)
+            incrementButton.setToolTip(self._translate(self._window_name, incrementTooltip.format(abilityAbbreviation)))
 
         self._inventoryTable.update()
 
@@ -304,6 +338,7 @@ class UiGame(UI):
         self._menuWindow.setTitle(self._translate(self._window_name, "Window"))
         self._menuPosition.setTitle(self._translate(self._window_name, "Position"))
         self._menuResize.setTitle(self._translate(self._window_name, "Resize"))
+        self._menuHelp.setText(self._translate(self._window_name, "Help"))
 
         self._action_topLeft.setText(self._translate(self._window_name, "Top-Left Corner"))
         self._action_topLeft.setToolTip(self._translate(self._window_name, "Set the window position"))
