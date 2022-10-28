@@ -36,9 +36,12 @@ class Editor(QtCore.QObject):
         self.requirementAbilityIndex: int = 0
         self.requirementItemIndex: int = 0
         self.rewardItemIndex: int = 0
-        self.reset()
+        self.reset(False)
         app = QtWidgets.QApplication(sys.argv)
         self.__initializeUi()
+        self.updateItemNameComboBoxes()
+        self.refresh()
+        self.window.showMaximized()
         sys.exit(app.exec())
 
     def __initializeUi(self):
@@ -216,9 +219,8 @@ class Editor(QtCore.QObject):
         requirementItemIdLabel.setText("Item Id:")
         requirementItemIdLabel.setToolTip(itemIdTooltip)
         requirementItemIdLabel.setAlignment(QtCore.Qt.AlignRight)
-        self.requirementItemIdInput = QtWidgets.QLineEdit(requirementGroupBox)
-        self.requirementItemIdInput.setToolTip(itemIdTooltip)
-        self.requirementItemIdInput.setValidator(self.itemIdValidator)
+        self.requirementItemNameComboBox = QtWidgets.QComboBox(requirementGroupBox)
+        self.requirementItemNameComboBox.setEditable(False)
         requirementItemQtyLabel = QtWidgets.QLabel(requirementGroupBox)
         requirementItemQtyLabel.setText("Item Quantity:")
         requirementItemQtyLabel.setToolTip("Quantity of item required to take this action.")
@@ -259,8 +261,8 @@ class Editor(QtCore.QObject):
         rewardItemIdLabel.setText("Item Id:")
         rewardItemIdLabel.setToolTip(itemIdTooltip)
         rewardItemIdLabel.setAlignment(QtCore.Qt.AlignRight)
-        self.rewardItemIdInput = QtWidgets.QLineEdit(rewardGroupBox)
-        self.rewardItemIdInput.setValidator(self.itemIdValidator)
+        self.rewardItemNameComboBox = QtWidgets.QComboBox(rewardGroupBox)
+        self.rewardItemNameComboBox.setEditable(False)
         rewardItemQtyLabel = QtWidgets.QLabel(rewardGroupBox)
         rewardItemQtyLabel.setText("Item Quantity:")
         rewardItemQtyLabel.setToolTip("Quantity of item rewarded for taking this action.")
@@ -377,7 +379,7 @@ class Editor(QtCore.QObject):
         requirementGroupBoxLayout.addWidget(self.requirementAbilityScoreInput, 0, 4, 1, 1)
         requirementGroupBoxLayout.addLayout(requirementItemNavLayout, 1, 0, 1, 1)
         requirementGroupBoxLayout.addWidget(requirementItemIdLabel, 1, 1, 1, 1)
-        requirementGroupBoxLayout.addWidget(self.requirementItemIdInput, 1, 2, 1, 1)
+        requirementGroupBoxLayout.addWidget(self.requirementItemNameComboBox, 1, 2, 1, 1)
         requirementGroupBoxLayout.addWidget(requirementItemQtyLabel, 1, 3, 1, 1)
         requirementGroupBoxLayout.addWidget(self.requirementItemQtyInput, 1, 4, 1, 1)
         requirementGroupBox.setLayout(requirementGroupBoxLayout)
@@ -395,7 +397,7 @@ class Editor(QtCore.QObject):
         rewardGroupBoxLayout.addWidget(self.rewardExpInput, 0, 2, 1, 1)
         rewardGroupBoxLayout.addLayout(rewardItemNavLayout, 1, 0, 1, 1)
         rewardGroupBoxLayout.addWidget(rewardItemIdLabel, 1, 1, 1, 1)
-        rewardGroupBoxLayout.addWidget(self.rewardItemIdInput, 1, 2, 1, 1)
+        rewardGroupBoxLayout.addWidget(self.rewardItemNameComboBox, 1, 2, 1, 1)
         rewardGroupBoxLayout.addWidget(rewardItemQtyLabel, 1, 3, 1, 1)
         rewardGroupBoxLayout.addWidget(self.rewardItemQtyInput, 1, 4, 1, 1)
         rewardGroupBox.setLayout(rewardGroupBoxLayout)
@@ -455,7 +457,7 @@ class Editor(QtCore.QObject):
         self.imagePathButton.clicked.connect(self.pickImageFile)
         self.sceneDescriptionInput.textChanged.connect(
             partial(self.set, "scene._description", self.sceneDescriptionInput))
-        self.actionIdInput.textEdited.connect(partial(self.set, "action._id", self.actionIdInput))
+        self.actionIdInput.textEdited.connect(partial(self.set, "action._id", self.actionIdInput, int))
         self.actionDescriptionInput.textEdited.connect(
             partial(self.set, "action._description", self.actionDescriptionInput))
         self.actionConsequenceInput.textEdited.connect(
@@ -467,16 +469,18 @@ class Editor(QtCore.QObject):
         self.requirementAbilityComboBox.textActivated.connect(
             partial(self.set, "action.requirement.ability.name", self.requirementAbilityComboBox))
         self.requirementAbilityScoreInput.textEdited.connect(
-            partial(self.set, "action.requirement.ability.score", self.requirementAbilityScoreInput))
-        self.requirementItemIdInput.textEdited.connect(
-            partial(self.set, "action.requirement.item.id", self.requirementItemIdInput))
+            partial(self.set, "action.requirement.ability.score", self.requirementAbilityScoreInput, int))
+        self.requirementItemNameComboBox.textActivated.connect(
+            partial(self.set, "action.requirement.item.id", self.requirementItemNameComboBox, int))
         self.requirementItemQtyInput.textEdited.connect(
-            partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput))
-        self.rewardExpInput.textEdited.connect(partial(self.set, "action.reward.experience", self.rewardExpInput))
-        self.rewardItemIdInput.textEdited.connect(partial(self.set, "action.reward.item.id", self.rewardItemIdInput))
+            partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput, int))
+        self.rewardExpInput.textEdited.connect(partial(self.set, "action.reward.experience", self.rewardExpInput, int))
+        self.rewardItemNameComboBox.textActivated.connect(partial(self.set, "action.reward.item.id",
+                                                          self.rewardItemNameComboBox,
+                                                          int))
         self.rewardItemQtyInput.textEdited.connect(
-            partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput))
-        self.sceneIndexInput.textEdited.connect(partial(self.setSceneIndex, self.sceneIndexInput))
+            partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput, int))
+        self.sceneIndexInput.textEdited.connect(partial(self.setSceneIndex, self.sceneIndexInput, int))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
         self.previousRequirementItemButton.clicked.connect(partial(self.previous, "requirement item"))
         self.previousRewardItemButton.clicked.connect(partial(self.previous, "reward item"))
@@ -509,9 +513,6 @@ class Editor(QtCore.QObject):
         self.menuRedo.triggered.connect(self.redo)
         QtCore.QMetaObject.connectSlotsByName(self.window)
 
-        self.refresh()
-        self.window.showMaximized()
-
     def delete(self, context: str):
         deleteIndex = None
         data: list = None
@@ -535,6 +536,8 @@ class Editor(QtCore.QObject):
             self.previous(context)
             description = "Delete {}".format(context.capitalize())
             self.undoStack.push(UndoDelete(data, deleteIndex, description))
+            if context.__contains__("item"):
+                self.updateItemNameComboBoxes()
         self.refresh()
 
     def duplicate(self, target: str):
@@ -610,6 +613,7 @@ class Editor(QtCore.QObject):
                 self.rewardItemIndex = len(rewardItems)
                 newRewardItem = ItemRef(0, 1)
                 self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
+            self.updateItemNameComboBoxes()
         self.refresh()
 
     def next(self, context: str):
@@ -763,15 +767,15 @@ class Editor(QtCore.QObject):
                 len(self.items) > 0 and requirement and requirement.items and self.requirementItemIndex < len(
                     requirement.items))
             requirementItemIndexText = "-"
-            requirementItemIdText = "-"
+            requirementItemId = 0
             requirementItemQtyText = "-"
             if requirementItemAvailable:
                 requiredItem = requirement.items[self.requirementItemIndex]
                 requirementItemIndexText = "Item {}".format(self.requirementItemIndex)
-                requirementItemIdText = str(requiredItem.id)
+                requirementItemId = requiredItem.id
                 requirementItemQtyText = str(requiredItem.quantity)
             self.requirementItemIndexLabel.setText(requirementItemIndexText)
-            self.requirementItemIdInput.setText(requirementItemIdText)
+            self.requirementItemNameComboBox.setCurrentIndex(requirementItemId)
             self.requirementItemQtyInput.setText(requirementItemQtyText)
 
             reward = action.reward if actionAvailable else None
@@ -784,15 +788,15 @@ class Editor(QtCore.QObject):
             rewardItemAvailable = bool(
                 len(self.items) > 0 and reward and reward.items and self.rewardItemIndex < len(reward.items))
             rewardItemIndexText = "-"
-            rewardItemIdText = "-"
+            rewardItemId = 0
             rewardItemQtyText = "-"
             if rewardItemAvailable:
                 rewardItem = reward.items[self.rewardItemIndex]
                 rewardItemIndexText = "Item {}".format(self.rewardItemIndex)
-                rewardItemIdText = str(rewardItem.id)
+                rewardItemId = rewardItem.id
                 rewardItemQtyText = str(rewardItem.quantity)
             self.rewardItemIndexLabel.setText(rewardItemIndexText)
-            self.rewardItemIdInput.setText(rewardItemIdText)
+            self.rewardItemNameComboBox.setCurrentIndex(rewardItemId)
             self.rewardItemQtyInput.setText(rewardItemQtyText)
 
             self.previousSceneButton.setEnabled(sceneAvailable)
@@ -826,7 +830,7 @@ class Editor(QtCore.QObject):
             self.previousRequirementItemButton.setEnabled(requirementItemAvailable)
             self.nextRequirementItemButton.setEnabled(requirementItemAvailable)
             self.deleteRequirementItemButton.setEnabled(requirementItemAvailable)
-            self.requirementItemIdInput.setEnabled(requirementItemAvailable)
+            self.requirementItemNameComboBox.setEnabled(requirementItemAvailable)
             self.requirementItemQtyInput.setEnabled(requirementItemAvailable)
 
             self.newRewardItemButton.setEnabled(actionAvailable)
@@ -834,24 +838,28 @@ class Editor(QtCore.QObject):
             self.previousRewardItemButton.setEnabled(rewardItemAvailable)
             self.nextRewardItemButton.setEnabled(rewardItemAvailable)
             self.deleteRewardItemButton.setEnabled(rewardItemAvailable)
-            self.rewardItemIdInput.setEnabled(rewardItemAvailable)
+            self.rewardItemNameComboBox.setEnabled(rewardItemAvailable)
             self.rewardItemQtyInput.setEnabled(rewardItemAvailable)
         else:
             self.itemView.update()
             self.itemIdValidator.setTop(len(self.items) - 1)
 
-    def reset(self):
-        self.items: list[Item] = self.load(self.itemDatabasePath)
-        if not isinstance(self.items, list) or len(self.items) <= 0 or not isinstance(self.items[0], Item):
-            self.popup("Database Error", "The Item database is either formatted incorrectly or does not exist.")
-        self.scenes: list[Scene] = self.load(self.sceneDatabasePath)
-        if not isinstance(self.scenes, list) or len(self.scenes) <= 0 or not isinstance(self.scenes[0], Scene):
-            self.popup("Database Error", "The Scene database is either formatted incorrectly or does not exist.")
+    def reset(self, ui_is_initialized=True):
         self.actionIndex = 0
         self.sceneIndex = 0
         self.requirementAbilityIndex = 0
         self.requirementItemIndex = 0
         self.rewardItemIndex = 0
+
+        self.items: list[Item] = self.load(self.itemDatabasePath)
+        if not isinstance(self.items, list) or len(self.items) <= 0 or not isinstance(self.items[0], Item):
+            self.popup("Database Error", "The Item database is either formatted incorrectly or does not exist.")
+        if ui_is_initialized:
+            self.updateItemNameComboBoxes()
+
+        self.scenes: list[Scene] = self.load(self.sceneDatabasePath)
+        if not isinstance(self.scenes, list) or len(self.scenes) <= 0 or not isinstance(self.scenes[0], Scene):
+            self.popup("Database Error", "The Scene database is either formatted incorrectly or does not exist.")
 
     @staticmethod
     def save(path: str, data):
@@ -870,7 +878,7 @@ class Editor(QtCore.QObject):
         with open(self.configPath, 'w') as file:
             file.write(jsonpickle.encode(data, indent=4))
 
-    def set(self, context: str, widget):
+    def set(self, context: str, widget: any, value_type=str):
         if self.sceneIndex >= len(self.scenes):
             return
         attribute = context.split(".")[-1]
@@ -898,12 +906,15 @@ class Editor(QtCore.QObject):
         elif isinstance(widget, QtWidgets.QCheckBox):
             value = widget.isChecked()
         elif isinstance(widget, QtWidgets.QComboBox):
-            value = widget.currentText()
+            if value_type == str:
+                value = widget.currentText()
+            elif value_type == int:
+                value = widget.currentIndex()
         else:
             value = widget.text()
+            if value_type == int and len(value) > 0 and value != "-":
+                value = int(value)
 
-        if context.endswith("id") or context.endswith("score") or context.endswith("experience"):
-            value = int(value)
         target.__setattr__(attribute, value)
 
     def setItemDatabasePath(self, path: str):
@@ -929,6 +940,17 @@ class Editor(QtCore.QObject):
         function = self.previous
         if context.__contains__("delete"):
             function = self.next
+        if context.__contains__("item"):
+            self.updateItemNameComboBoxes()
         context = context[context.find(" ") + 1:]
         function(context)
         self.refresh()
+
+    def updateItemNameComboBoxes(self):
+        itemNames = []
+        for item in self.items:
+            itemNames.append(item.name)
+        self.requirementItemNameComboBox.clear()
+        self.requirementItemNameComboBox.addItems(itemNames)
+        self.rewardItemNameComboBox.clear()
+        self.rewardItemNameComboBox.addItems(itemNames)
