@@ -214,9 +214,9 @@ class Editor(QtCore.QObject):
         self.nextRequirementAbilityButton.setToolTip("Next Ability Requirement")
         self.nextRequirementAbilityButton.setIcon(self.nextIcon)
         self.nextRequirementAbilityButton.setFixedSize(buttonSize)
-        itemIdTooltip = "Row number of the item in the 'Item' tab."
+        itemIdTooltip = "The name of the item in the 'Item' tab."
         requirementItemIdLabel = QtWidgets.QLabel(requirementGroupBox)
-        requirementItemIdLabel.setText("Item Id:")
+        requirementItemIdLabel.setText("Item:")
         requirementItemIdLabel.setToolTip(itemIdTooltip)
         requirementItemIdLabel.setAlignment(QtCore.Qt.AlignRight)
         self.requirementItemNameComboBox = QtWidgets.QComboBox(requirementGroupBox)
@@ -258,7 +258,7 @@ class Editor(QtCore.QObject):
         self.rewardExpInput.setToolTip(rewardExpTooltip)
         self.rewardExpInput.setValidator(self.positiveNumberValidator)
         rewardItemIdLabel = QtWidgets.QLabel(rewardGroupBox)
-        rewardItemIdLabel.setText("Item Id:")
+        rewardItemIdLabel.setText("Item:")
         rewardItemIdLabel.setToolTip(itemIdTooltip)
         rewardItemIdLabel.setAlignment(QtCore.Qt.AlignRight)
         self.rewardItemNameComboBox = QtWidgets.QComboBox(rewardGroupBox)
