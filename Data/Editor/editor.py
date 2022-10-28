@@ -123,12 +123,14 @@ class Editor(QtCore.QObject):
         actionDescriptionLabel.setText("Description:")
         actionDescriptionLabel.setAlignment(QtCore.Qt.AlignRight)
         self.actionDescriptionInput = QtWidgets.QLineEdit(actionTab)
+        gotoTooltip = "Scene to go to upon selection."
         actionGoToLabel = QtWidgets.QLabel(actionTab)
         actionGoToLabel.setText("Go to:")
-        actionGoToLabel.setToolTip("Scene to go to upon action selection.")
+        actionGoToLabel.setToolTip(gotoTooltip)
         actionGoToLabel.setAlignment(QtCore.Qt.AlignRight)
         self.actionGoToComboBox = QtWidgets.QComboBox(actionTab)
         self.actionGoToComboBox.setEditable(False)
+        self.actionGoToComboBox.setToolTip(gotoTooltip)
         consequenceTooltip = "Description of what happens after selecting this action."
         actionConsequenceLabel = QtWidgets.QLabel(actionTab)
         actionConsequenceLabel.setText("Consequence:")
@@ -732,7 +734,7 @@ class Editor(QtCore.QObject):
                 actionIndexText = "Action {}".format(str(self.actionIndex))
                 actionDescriptionText = action.description
                 actionConsequenceText = action.consequence
-                actionId = max(0, min(len(self.scenes), action.id))
+                actionId = max(-self.__numberOfReservedActions, min(len(self.scenes), action.id))
                 actionId += self.__numberOfReservedActions
                 secret = action.secret
                 disableOnSelect = action.disableOnSelect
