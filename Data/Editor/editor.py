@@ -23,6 +23,7 @@ from Data.UI.uisettings import UiSettings
 
 class Editor(QtCore.QObject):
     __ability_names = ["dexterity", "intelligence", "strength", "will", "wisdom"]
+    __numberOfReservedActions = 2
 
     def __init__(self):
         super().__init__()
@@ -39,6 +40,7 @@ class Editor(QtCore.QObject):
         self.reset(False)
         app = QtWidgets.QApplication(sys.argv)
         self.__initializeUi()
+        self.updateSceneNameComboBoxes()
         self.updateItemNameComboBoxes()
         self.refresh()
         self.window.showMaximized()
@@ -68,7 +70,6 @@ class Editor(QtCore.QObject):
 
         self.undoStack = QtWidgets.QUndoStack(self.window)
         self.actionIdValidator = QtGui.QIntValidator(-777, 999999)
-        self.itemIdValidator = QtGui.QIntValidator(0, len(self.items))
         self.positiveNumberValidator = QtGui.QIntValidator(0, 999999)
 
         sceneTabCentralWidget = QtWidgets.QWidget(self.centralTabWidget)
@@ -97,11 +98,8 @@ class Editor(QtCore.QObject):
         sceneIndexLabel.setText("Scene:")
         sceneIndexLabel.setAlignment(QtCore.Qt.AlignRight)
         sceneIndexLabel.setFixedWidth(indexLabelWidth)
-        self.sceneIndexInput = QtWidgets.QLineEdit(sceneTabCentralWidget)
-        self.sceneIndexInput.setMaximumWidth(indexLabelWidth)
-        self.sceneIndexInput.setAlignment(QtCore.Qt.AlignCenter)
-        self.sceneIndexInput.setToolTip("Scene Index")
-        self.sceneIndexInput.setValidator(self.positiveNumberValidator)
+        self.sceneNameComboBox = QtWidgets.QComboBox(sceneTabCentralWidget)
+        self.sceneNameComboBox.setEditable(False)
         self.previousSceneButton = QtWidgets.QPushButton(sceneTabCentralWidget)
         self.previousSceneButton.setToolTip("Previous Scene")
         self.previousSceneButton.setIcon(self.previousIcon)
@@ -125,15 +123,12 @@ class Editor(QtCore.QObject):
         actionDescriptionLabel.setText("Description:")
         actionDescriptionLabel.setAlignment(QtCore.Qt.AlignRight)
         self.actionDescriptionInput = QtWidgets.QLineEdit(actionTab)
-        actionIdTooltip = "< -1: scene index unaffected\n-1: go to previous scene\n>= 0: go to scene index"
-        actionIdLabel = QtWidgets.QLabel(actionTab)
-        actionIdLabel.setText("Id:")
-        actionIdLabel.setToolTip(actionIdTooltip)
-        actionIdLabel.setAlignment(QtCore.Qt.AlignRight)
-        self.actionIdInput = QtWidgets.QLineEdit(actionTab)
-        self.actionIdInput.setFixedWidth(indexLabelWidth)
-        self.actionIdInput.setToolTip(actionIdTooltip)
-        self.actionIdInput.setValidator(self.actionIdValidator)
+        actionGoToLabel = QtWidgets.QLabel(actionTab)
+        actionGoToLabel.setText("Go to:")
+        actionGoToLabel.setToolTip("Scene to go to upon action selection.")
+        actionGoToLabel.setAlignment(QtCore.Qt.AlignRight)
+        self.actionGoToComboBox = QtWidgets.QComboBox(actionTab)
+        self.actionGoToComboBox.setEditable(False)
         consequenceTooltip = "Description of what happens after selecting this action."
         actionConsequenceLabel = QtWidgets.QLabel(actionTab)
         actionConsequenceLabel.setText("Consequence:")
@@ -339,7 +334,7 @@ class Editor(QtCore.QObject):
         sceneNavLayout.setAlignment(QtCore.Qt.AlignLeft)
         sceneNavLayout.addWidget(self.previousSceneButton)
         sceneNavLayout.addWidget(sceneIndexLabel)
-        sceneNavLayout.addWidget(self.sceneIndexInput)
+        sceneNavLayout.addWidget(self.sceneNameComboBox)
         sceneNavLayout.addWidget(self.nextSceneButton)
         sceneNavLayout.addWidget(self.newSceneButton)
         sceneNavLayout.addWidget(self.deleteSceneButton)
@@ -414,8 +409,8 @@ class Editor(QtCore.QObject):
         actionGroupBoxLayout.addLayout(actionNavLayout, 0, 0, 1, 1)
         actionGroupBoxLayout.addWidget(actionDescriptionLabel, 0, 1, 1, 1)
         actionGroupBoxLayout.addWidget(self.actionDescriptionInput, 0, 2, 1, 1)
-        actionGroupBoxLayout.addWidget(actionIdLabel, 0, 3, 1, 1)
-        actionGroupBoxLayout.addWidget(self.actionIdInput, 0, 4, 1, 1)
+        actionGroupBoxLayout.addWidget(actionGoToLabel, 0, 3, 1, 1)
+        actionGroupBoxLayout.addWidget(self.actionGoToComboBox, 0, 4, 1, 1)
         actionGroupBoxLayout.addWidget(actionConsequenceLabel, 1, 1, 1, 1)
         actionGroupBoxLayout.addWidget(self.actionConsequenceInput, 1, 2, 1, 1)
         actionGroupBoxLayout.addWidget(actionSecretLabel, 1, 3, 1, 1)
@@ -457,7 +452,7 @@ class Editor(QtCore.QObject):
         self.imagePathButton.clicked.connect(self.pickImageFile)
         self.sceneDescriptionInput.textChanged.connect(
             partial(self.set, "scene._description", self.sceneDescriptionInput))
-        self.actionIdInput.textEdited.connect(partial(self.set, "action._id", self.actionIdInput, int))
+        self.actionGoToComboBox.textActivated.connect(partial(self.set, "action._id", self.actionGoToComboBox, int))
         self.actionDescriptionInput.textEdited.connect(
             partial(self.set, "action._description", self.actionDescriptionInput))
         self.actionConsequenceInput.textEdited.connect(
@@ -480,7 +475,8 @@ class Editor(QtCore.QObject):
                                                           int))
         self.rewardItemQtyInput.textEdited.connect(
             partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput, int))
-        self.sceneIndexInput.textEdited.connect(partial(self.setSceneIndex, self.sceneIndexInput, int))
+
+        self.sceneNameComboBox.textActivated.connect(partial(self.setSceneIndex, self.sceneNameComboBox))
         self.previousRequirementAbilityButton.clicked.connect(partial(self.previous, "requirement ability"))
         self.previousRequirementItemButton.clicked.connect(partial(self.previous, "requirement item"))
         self.previousRewardItemButton.clicked.connect(partial(self.previous, "reward item"))
@@ -501,6 +497,7 @@ class Editor(QtCore.QObject):
         self.newRewardItemButton.clicked.connect(partial(self.new, "reward item"))
         self.newActionButton.clicked.connect(partial(self.new, "action"))
         self.newSceneButton.clicked.connect(partial(self.new, "scene"))
+        self.itemModel.layoutChanged.connect(self.updateItemNameComboBoxes)
         self.itemModel.layoutChanged.connect(self.refresh)
         menuDuplicateAction.triggered.connect(partial(self.duplicate, "action"))
         menuDuplicateScene.triggered.connect(partial(self.duplicate, "scene"))
@@ -514,11 +511,13 @@ class Editor(QtCore.QObject):
         QtCore.QMetaObject.connectSlotsByName(self.window)
 
     def delete(self, context: str):
+        callback = None
         deleteIndex = None
         data: list = None
         if context == "scene":
             deleteIndex = self.sceneIndex
             data = self.scenes
+            callback = self.updateSceneNameComboBoxes
         elif context == "action":
             deleteIndex = self.actionIndex
             data = self.scenes[self.sceneIndex].actions
@@ -535,9 +534,7 @@ class Editor(QtCore.QObject):
         if deleteIndex is not None and data:
             self.previous(context)
             description = "Delete {}".format(context.capitalize())
-            self.undoStack.push(UndoDelete(data, deleteIndex, description))
-            if context.__contains__("item"):
-                self.updateItemNameComboBoxes()
+            self.undoStack.push(UndoDelete(data, deleteIndex, description, callback))
         self.refresh()
 
     def duplicate(self, target: str):
@@ -547,7 +544,7 @@ class Editor(QtCore.QObject):
         if target == "scene":
             duplicateScene = copy.deepcopy(scene)
             self.sceneIndex = len(self.scenes)
-            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, duplicateScene, "Duplicate Scene"))
+            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, duplicateScene, "Duplicate Scene", self.updateSceneNameComboBoxes))
         else:
             actions = scene.actions
             if not actions:
@@ -582,7 +579,7 @@ class Editor(QtCore.QObject):
             self.requirementItemIndex = 0
             self.rewardItemIndex = 0
             newScene = Scene(actions=[])
-            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description))
+            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description, self.updateSceneNameComboBoxes))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
             self.actionIndex = len(actions)
@@ -613,7 +610,6 @@ class Editor(QtCore.QObject):
                 self.rewardItemIndex = len(rewardItems)
                 newRewardItem = ItemRef(0, 1)
                 self.undoStack.push(UndoNew(rewardItems, self.rewardItemIndex, newRewardItem, description))
-            self.updateItemNameComboBoxes()
         self.refresh()
 
     def next(self, context: str):
@@ -707,17 +703,17 @@ class Editor(QtCore.QObject):
         if self.centralTabWidget.currentIndex() == 0:
             scene: Scene = None
             sceneAvailable = bool(self.scenes and self.sceneIndex < len(self.scenes))
-            sceneIndexText = "-"
+            sceneIndex = 0
             sceneNameText = "-"
             imagePathText = "-"
             sceneDescription = "-"
             if sceneAvailable:
                 scene = self.scenes[self.sceneIndex]
-                sceneIndexText = str(self.sceneIndex)
+                sceneIndex = self.sceneIndex
                 sceneNameText = scene.name
                 imagePathText = scene.imagePath
                 sceneDescription = scene.description
-            self.sceneIndexInput.setText(sceneIndexText)
+            self.sceneNameComboBox.setCurrentIndex(sceneIndex)
             self.sceneNameInput.setText(sceneNameText)
             self.imagePathInput.setText(imagePathText)
             self.sceneDescriptionInput.setText(sceneDescription)
@@ -727,7 +723,7 @@ class Editor(QtCore.QObject):
             actionIndexText = "-"
             actionDescriptionText = "-"
             actionConsequenceText = "-"
-            actionIdInputText = "-"
+            actionId = 0
             secret = False
             disableOnSelect = False
             removeOnSelect = False
@@ -736,14 +732,15 @@ class Editor(QtCore.QObject):
                 actionIndexText = "Action {}".format(str(self.actionIndex))
                 actionDescriptionText = action.description
                 actionConsequenceText = action.consequence
-                actionIdInputText = str(action.id)
+                actionId = max(0, min(len(self.scenes), action.id))
+                actionId += self.__numberOfReservedActions
                 secret = action.secret
                 disableOnSelect = action.disableOnSelect
                 removeOnSelect = action.removeOnSelect
             self.actionIndexLabel.setText(actionIndexText)
             self.actionDescriptionInput.setText(actionDescriptionText)
             self.actionConsequenceInput.setText(actionConsequenceText)
-            self.actionIdInput.setText(actionIdInputText)
+            self.actionGoToComboBox.setCurrentIndex(actionId)
             self.actionSecretCheck.setChecked(secret)
             self.disableOnSelectCheck.setChecked(disableOnSelect)
             self.removeOnSelectCheck.setChecked(removeOnSelect)
@@ -800,7 +797,7 @@ class Editor(QtCore.QObject):
             self.rewardItemQtyInput.setText(rewardItemQtyText)
 
             self.previousSceneButton.setEnabled(sceneAvailable)
-            self.sceneIndexInput.setEnabled(sceneAvailable)
+            self.sceneNameComboBox.setEnabled(sceneAvailable)
             self.nextSceneButton.setEnabled(sceneAvailable)
             self.deleteSceneButton.setEnabled(sceneAvailable)
             self.sceneNameInput.setEnabled(sceneAvailable)
@@ -814,7 +811,7 @@ class Editor(QtCore.QObject):
             self.deleteActionButton.setEnabled(actionAvailable)
             self.actionDescriptionInput.setEnabled(actionAvailable)
             self.actionConsequenceInput.setEnabled(actionAvailable)
-            self.actionIdInput.setEnabled(actionAvailable)
+            self.actionGoToComboBox.setEnabled(actionAvailable)
             self.actionSecretCheck.setEnabled(actionAvailable)
             self.disableOnSelectCheck.setEnabled(actionAvailable)
             self.removeOnSelectCheck.setEnabled(actionAvailable)
@@ -842,7 +839,6 @@ class Editor(QtCore.QObject):
             self.rewardItemQtyInput.setEnabled(rewardItemAvailable)
         else:
             self.itemView.update()
-            self.itemIdValidator.setTop(len(self.items) - 1)
 
     def reset(self, ui_is_initialized=True):
         self.actionIndex = 0
@@ -860,6 +856,8 @@ class Editor(QtCore.QObject):
         self.scenes: list[Scene] = self.load(self.sceneDatabasePath)
         if not isinstance(self.scenes, list) or len(self.scenes) <= 0 or not isinstance(self.scenes[0], Scene):
             self.popup("Database Error", "The Scene database is either formatted incorrectly or does not exist.")
+        if ui_is_initialized:
+            self.updateSceneNameComboBoxes()
 
     @staticmethod
     def save(path: str, data):
@@ -910,6 +908,8 @@ class Editor(QtCore.QObject):
                 value = widget.currentText()
             elif value_type == int:
                 value = widget.currentIndex()
+                if context.__contains__("action"):
+                    value -= self.__numberOfReservedActions
         else:
             value = widget.text()
             if value_type == int and len(value) > 0 and value != "-":
@@ -923,15 +923,8 @@ class Editor(QtCore.QObject):
     def setSceneDatabasePath(self, path: str):
         self.sceneDatabasePath = path
 
-    def setSceneIndex(self, widget: QtWidgets.QLineEdit):
-        try:
-            value = int(widget.text()) - 1
-        except ValueError:
-            value = 0
-        value = max(value, 0)
-        value = min(value, len(self.scenes) - 1)
-        self.sceneIndex = value
-        widget.setText(str(value))
+    def setSceneIndex(self, widget: QtWidgets.QComboBox):
+        self.sceneIndex = widget.currentIndex()
         self.refresh()
 
     def undo(self):
@@ -945,6 +938,16 @@ class Editor(QtCore.QObject):
         context = context[context.find(" ") + 1:]
         function(context)
         self.refresh()
+
+    def updateSceneNameComboBoxes(self):
+        sceneNames = []
+        for scene in self.scenes:
+            sceneNames.append(scene.name)
+        self.sceneNameComboBox.clear()
+        self.sceneNameComboBox.addItems(sceneNames)
+        self.actionGoToComboBox.clear()
+        self.actionGoToComboBox.addItems(["None", "Previous"])
+        self.actionGoToComboBox.addItems(sceneNames)
 
     def updateItemNameComboBoxes(self):
         itemNames = []
