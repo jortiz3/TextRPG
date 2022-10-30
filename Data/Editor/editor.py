@@ -37,7 +37,7 @@ class Editor(QtCore.QObject):
         self.requirementAbilityIndex: int = 0
         self.requirementItemIndex: int = 0
         self.rewardItemIndex: int = 0
-        self.reset(False)
+        self.reset()
         app = QtWidgets.QApplication(sys.argv)
         self.__initializeUi()
         self.updateSceneNameComboBoxes()
@@ -445,11 +445,12 @@ class Editor(QtCore.QObject):
         self.settingsUi = UiSettings(QtWidgets.QMainWindow())
         self.settingsUi.connect(get_item_path=partial(self.__getattribute__, "itemDatabasePath"),
                                 get_scene_path=partial(self.__getattribute__, "sceneDatabasePath"),
-                                set_item_path=self.setItemDatabasePath,
-                                set_scene_path=self.setSceneDatabasePath)
+                                set_item_path=self.setItemDatabasePath, set_scene_path=self.setSceneDatabasePath)
 
         self.centralTabWidget.currentChanged.connect(self.refresh)
         self.sceneNameInput.textEdited.connect(partial(self.set, "scene._name", self.sceneNameInput))
+        self.sceneNameInput.textEdited.connect(self.updateSceneNameComboBoxes)
+        self.sceneNameInput.textEdited.connect(self.refresh)
         self.imagePathInput.textEdited.connect(partial(self.set, "scene._imagePath", self.imagePathInput))
         self.imagePathButton.clicked.connect(self.pickImageFile)
         self.sceneDescriptionInput.textChanged.connect(
@@ -472,9 +473,8 @@ class Editor(QtCore.QObject):
         self.requirementItemQtyInput.textEdited.connect(
             partial(self.set, "action.requirement.item.quantity", self.requirementItemQtyInput, int))
         self.rewardExpInput.textEdited.connect(partial(self.set, "action.reward.experience", self.rewardExpInput, int))
-        self.rewardItemNameComboBox.textActivated.connect(partial(self.set, "action.reward.item.id",
-                                                          self.rewardItemNameComboBox,
-                                                          int))
+        self.rewardItemNameComboBox.textActivated.connect(
+            partial(self.set, "action.reward.item.id", self.rewardItemNameComboBox, int))
         self.rewardItemQtyInput.textEdited.connect(
             partial(self.set, "action.reward.item.quantity", self.rewardItemQtyInput, int))
 
@@ -546,7 +546,8 @@ class Editor(QtCore.QObject):
         if target == "scene":
             duplicateScene = copy.deepcopy(scene)
             self.sceneIndex = len(self.scenes)
-            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, duplicateScene, "Duplicate Scene", self.updateSceneNameComboBoxes))
+            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, duplicateScene, "Duplicate Scene",
+                                        self.updateSceneNameComboBoxes))
         else:
             actions = scene.actions
             if not actions:
@@ -581,7 +582,8 @@ class Editor(QtCore.QObject):
             self.requirementItemIndex = 0
             self.rewardItemIndex = 0
             newScene = Scene(actions=[])
-            self.undoStack.push(UndoNew(self.scenes, self.sceneIndex, newScene, description, self.updateSceneNameComboBoxes))
+            self.undoStack.push(
+                UndoNew(self.scenes, self.sceneIndex, newScene, description, self.updateSceneNameComboBoxes))
         elif context == "action":
             actions = self.scenes[self.sceneIndex].actions
             self.actionIndex = len(actions)
@@ -842,7 +844,7 @@ class Editor(QtCore.QObject):
         else:
             self.itemView.update()
 
-    def reset(self, ui_is_initialized=True):
+    def reset(self):
         self.actionIndex = 0
         self.sceneIndex = 0
         self.requirementAbilityIndex = 0
@@ -852,14 +854,12 @@ class Editor(QtCore.QObject):
         self.items: list[Item] = self.load(self.itemDatabasePath)
         if not isinstance(self.items, list) or len(self.items) <= 0 or not isinstance(self.items[0], Item):
             self.popup("Database Error", "The Item database is either formatted incorrectly or does not exist.")
-        if ui_is_initialized:
-            self.updateItemNameComboBoxes()
+        self.updateItemNameComboBoxes()
 
         self.scenes: list[Scene] = self.load(self.sceneDatabasePath)
         if not isinstance(self.scenes, list) or len(self.scenes) <= 0 or not isinstance(self.scenes[0], Scene):
             self.popup("Database Error", "The Scene database is either formatted incorrectly or does not exist.")
-        if ui_is_initialized:
-            self.updateSceneNameComboBoxes()
+        self.updateSceneNameComboBoxes()
 
     @staticmethod
     def save(path: str, data):
@@ -881,6 +881,7 @@ class Editor(QtCore.QObject):
     def set(self, context: str, widget: any, value_type=str):
         if self.sceneIndex >= len(self.scenes):
             return
+
         attribute = context.split(".")[-1]
         scene = self.scenes[self.sceneIndex]
         target = scene
@@ -942,6 +943,8 @@ class Editor(QtCore.QObject):
         self.refresh()
 
     def updateSceneNameComboBoxes(self):
+        if not hasattr(self, 'sceneNameComboBox'):
+            return
         sceneNames = []
         for scene in self.scenes:
             sceneNames.append(scene.name)
@@ -952,6 +955,8 @@ class Editor(QtCore.QObject):
         self.actionGoToComboBox.addItems(sceneNames)
 
     def updateItemNameComboBoxes(self):
+        if not hasattr(self, 'requirementItemNameComboBox'):
+            return
         itemNames = []
         for item in self.items:
             itemNames.append(item.name)

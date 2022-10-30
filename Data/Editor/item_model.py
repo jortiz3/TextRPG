@@ -66,4 +66,5 @@ class ItemModel(QAbstractTableModel):
             item.type = value
         else:
             item.name = value
+        self.layoutChanged.emit()
         return True
